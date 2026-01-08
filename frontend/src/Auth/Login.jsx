@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const Login = () => {
   return (
     <>
-      <Navbar />
+
       <div className="py-20 px-4 sm:px-8 md:px-16 lg:px-60 xl:px-80">
         <h1 className="text-gray-800 text-3xl font-bold mb-6">LOGIN</h1>
 

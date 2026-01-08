@@ -4,7 +4,7 @@ import Navbar from "../../components/Navbar";
 const HowDoesItWork = () => {
   return (
     <>
-    <Navbar/>
+   
       <div className="min-h-screen py-30 bg-gray-50 text-gray-800" style={{ paddingRight:"5rem", paddingLeft:"5rem" }}>
         {/* Header Section */}
         <div className="py-10 md:px-20 sm:px-10">

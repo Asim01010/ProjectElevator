@@ -8,17 +8,17 @@ import ProjectDetail from "./Profile/components/ProjectDetail";
 import Register from "./Auth/Register";
 import Login from "./Auth/Login";
 import Design from "./Design/Design";
+import Navbar from "./components/Navbar";
 
 const App = () => {
   return (
     <Router>
+      <Navbar/>
       <Routes>
         {/* Home route */}
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-
-        {/* You can add more routes here in future */}
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile-edit" element={<ProfileEdit />} />
         <Route path="/how-does-it-work" element={<HowDoesItWork />} />

@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 const Register = () => {
   return (
     <div>
-      <Navbar />
+   
 
       <div className="pt-20 px-4 sm:px-8 md:px-16 lg:px-60 xl:px-60 w-full" >
         <h1 className="text-gray-800 text-3xl font-bold mb-6">

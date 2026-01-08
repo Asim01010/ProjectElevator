@@ -10,7 +10,7 @@ const ProfileEdit = () => {
   return (
     <>
       {" "}
-      <Navbar />
+      
       <div className="min-h-screen bg-gray-50 text-gray-800 py-30 md:px-20 sm:px-10" style={{ paddingRight:"15rem", paddingLeft:"15rem" }}>
         <div className="max-w-6xl mx-auto">
           {/* Title */}

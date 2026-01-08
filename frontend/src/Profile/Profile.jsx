@@ -8,7 +8,7 @@ import ProjectsGrid from "./components/ProjectsGrid";
 const Profile = () => {
   return (
     <>
-      <Navbar />
+     
       <div
         className="min-h-screen bg-gray-50 text-gray-800 py-30   md:px-20 sm:px-10"
         style={{ paddingLeft: "15rem", paddingRight: "15rem" }}

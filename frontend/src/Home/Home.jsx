@@ -13,35 +13,7 @@ const Home = () => {
         backgroundImage: "url('/hero.jpg')",
       }}
     >
-      {/* NAVBAR */}
-      <nav className="absolute top-0 left-0 w-full flex items-start justify-between px-10 py-8 text-white">
-        {/* LEFT HEADER */}
-        <div>
-          <h1 className="text-2xl tracking-[0.2em] font-light">
-            ELEVATOR DESIGN STUDIO
-          </h1>
-          <p className="text-[11px] tracking-[0.15em] opacity-80 mt-1">
-            A FORMS + SURFACES DESIGN TOOL
-          </p>
-        </div>
-
-        {/* RIGHT ICONS */}
-        <div className="flex items-center gap-6">
-          <User
-            className="cursor-pointer opacity-80 hover:opacity-100"
-            size={30}
-          />
-          <LogOut
-            className="cursor-pointer opacity-80 hover:opacity-100"
-            size={30}
-          />
-          <Menu
-            className="cursor-pointer opacity-80 hover:opacity-100"
-            size={30}
-            onClick={() => setSidebarOpen(true)}
-          />
-        </div>
-      </nav>
+     
 
       {/* SIDEBAR */}
       <div
@@ -103,18 +75,6 @@ const Home = () => {
         </button>
       </div>
 
-      {/* DARK OVERLAY (optional) */}
-      <div className="absolute inset-0 bg-black/20 -z-10"></div>
-
-      {/* FOOTER */}
-      <div className="w-full flex absolute bottom-1 justify-between text-white px-10">
-        <p>©2026 Forms+Surfaces</p>
-        <div className="flex gap-4 text-white">
-          <FaFacebookF className="cursor-pointer hover:opacity-80" />
-          <FaInstagram className="cursor-pointer hover:opacity-80" />
-          <FaPinterestP className="cursor-pointer hover:opacity-80" />
-        </div>
-      </div>
     </div>
   );
 };
