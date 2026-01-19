@@ -1,0 +1,186 @@
+import React, { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
+import {
+  getProjectById,
+  projectReset,
+} from "../redux/features/Project/projectSlice"; // adjust path
+import { IoAddCircleOutline, IoCopyOutline } from "react-icons/io5";
+import { MdDeleteForever } from "react-icons/md";
+import SubProjectDetail from "./SubProjectDetail";
+
+const ProjectDetail = () => {
+  const { id } = useParams(); // ← gets the :id from URL
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { currentProject, projectLoading, projectError, projectMessage } =
+    useSelector((state) => state.project);
+
+  // Fetch project when component mounts or id changes
+  useEffect(() => {
+    if (id) {
+      dispatch(getProjectById(id));
+    }
+    return () => {
+      dispatch(projectReset()); // cleanup
+    };
+  }, [dispatch, id]);
+
+  // Toast feedback
+  useEffect(() => {
+    if (projectError) {
+      toast.error(projectMessage || "Failed to load project");
+      // Optional: redirect back if project not found
+      // navigate("/profile");
+    }
+  }, [projectError, projectMessage, navigate]);
+
+  if (projectLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-lg text-gray-600">Loading project...</p>
+      </div>
+    );
+  }
+
+  if (!currentProject && id) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl text-red-600">Project not found</p>
+      </div>
+    );
+  }
+
+  // Use real data or fallbacks
+  const projectName = currentProject?.name || "elevator_2";
+  const company = currentProject?.company || "";
+  const specifier = currentProject?.specifier || "";
+  const jobLocation = currentProject?.jobLocation || "";
+  const created = currentProject?.createdAt
+    ? new Date(currentProject.createdAt).toLocaleString()
+    : "N/A";
+  const lastModified = currentProject?.updatedAt
+    ? new Date(currentProject.updatedAt).toLocaleString()
+    : "N/A";
+
+  return (
+    <section className="min-h-screen flex flex-col justify-start items-center py-24 border ">
+      <div className="w-[70%]">
+        {/* Header */}
+        <h3 className="text-gray-500 text-lg mb-4">
+          My Project | {projectName}
+        </h3>
+
+        {/* Main Card - 3 Column Grid */}
+        <div className="flex border bg-white">
+          <div className="grid grid-cols-3 gap-4 w-full p-4">
+            {/* Column 1 - Image and Buttons */}
+            <div className="flex flex-col gap-2">
+              <img
+                src="/Howorks.jpg"
+                alt="Elevator Preview"
+                className="w-full object-cover"
+              />
+
+              <div className="grid grid-cols-1 gap-2 text-sm text-gray-500 text-[12px]">
+                <button className="flex items-center hover:text-gray-900 underline cursor-pointer">
+                  <IoAddCircleOutline />
+                  ADD ELEVATOR INTERIOR
+                </button>
+
+                <button className="flex items-center hover:text-gray-900 underline cursor-pointer">
+                  <IoCopyOutline /> DUPLICATE PROJECT
+                </button>
+
+                <button className="flex items-center hover:text-gray-900 underline cursor-pointer">
+                  <MdDeleteForever /> DELETE PROJECT
+                </button>
+              </div>
+            </div>
+
+            {/* Column 2 & 3 - Paragraph spanning full width */}
+            <div className="col-span-2 flex flex-col gap-4">
+              <p className="text-gray-600 text-[12px] leading-relaxed">
+                Within a project you can create multiple elevator interior
+                designs. You can continue modifying them individually until you
+                request an 'Advanced Download'. To ensure data accuracy, your
+                design will stay locked until your request is processed. Note
+                that you can only request 'Advanced Download' for individual
+                elevator interiors with a 'Complete' status within a project.
+              </p>
+
+              {/* Form and Dates in 2 columns */}
+              <div className="grid grid-cols-2 gap-4 uppercase">
+                {/* Form inputs */}
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
+                      Project Name:
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue={projectName}
+                      className="w-[60%] outline-none border border-gray-500"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
+                      Company:
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue={company}
+                      className="w-[60%] outline-none border border-gray-500"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
+                      Specifier:
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue={specifier}
+                      className="w-[60%] outline-none border border-gray-500"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
+                      Job Location:
+                    </label>
+                    <textarea
+                      defaultValue={jobLocation}
+                      className="w-[60%] outline-none border border-gray-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Created Dates */}
+                <div className="flex flex-col justify-start gap-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
+                      Created:
+                    </label>
+                    <p className="text-[10px]">{created}</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
+                      Last Modified:
+                    </label>
+                    <p className="text-[10px]">{lastModified}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sub projects section */}
+      <SubProjectDetail />
+    </section>
+  );
+};
+
+export default ProjectDetail;

@@ -1,16 +1,95 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import {
+  getUserProjects,
+  createProject,
+  projectReset,
+} from "../redux/features/Project/projectSlice"; // adjust path
 import Navbar from "../components/Navbar";
-import { FilePenLine } from "lucide-react";
+import { FilePenLine, PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import Project from "./components/Project";
 import ProjectsGrid from "./components/ProjectsGrid";
 
 const Profile = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const {
+    projects,
+    projectLoading,
+    projectSuccess,
+    projectError,
+    projectMessage,
+  } = useSelector((state) => state.project);
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [formData, setFormData] = useState({ name: "", company: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortMode, setSortMode] = useState("date"); // date | az | za | custom
+
+  // Fetch projects on mount
+  useEffect(() => {
+    dispatch(getUserProjects());
+  }, [dispatch]);
+
+  // Toast + reset + redirect after create
+  useEffect(() => {
+    if (projectSuccess) {
+      toast.success(projectMessage || "Operation successful");
+      dispatch(projectReset());
+
+      // If we just created → redirect to the new project's detail page
+      // (assuming the last project in list is the newest)
+      if (projectMessage?.includes("created")) {
+        const latestProject = projects[projects.length - 1];
+        if (latestProject?._id) {
+          navigate(`/project/${latestProject._id}`);
+        }
+      }
+    }
+
+    if (projectError) {
+      toast.error(projectMessage || "Something went wrong");
+      dispatch(projectReset());
+    }
+  }, [
+    projectSuccess,
+    projectError,
+    projectMessage,
+    projects,
+    navigate,
+    dispatch,
+  ]);
+
+  const handleCreateProject = (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.company.trim()) {
+      return toast.error("Project name and company are required");
+    }
+    dispatch(createProject(formData));
+    setFormData({ name: "", company: "" });
+    setShowCreateModal(false);
+  };
+
+  // Client-side search & sort
+  const filteredAndSortedProjects = projects
+    .filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      if (sortMode === "az") return a.name.localeCompare(b.name);
+      if (sortMode === "za") return b.name.localeCompare(a.name);
+      if (sortMode === "date")
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      return 0; // custom → keep original order or implement later
+    });
+
   return (
     <>
-     
+      <Navbar />
+
       <div
-        className="min-h-screen bg-gray-50 text-gray-800 py-30   md:px-20 sm:px-10"
+        className="min-h-screen bg-gray-50 text-gray-800 py-20 md:px-20 sm:px-10"
         style={{ paddingLeft: "15rem", paddingRight: "15rem" }}
       >
         {/* Header Text */}
@@ -22,37 +101,32 @@ const Profile = () => {
           </h1>
         </div>
 
-        {/* Divider */}
         <hr className="max-w-6xl mx-auto border-t border-gray-300 mb-10" />
 
         {/* Top Section: My Profile + How Does It Work? */}
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2  mb-10">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 mb-10">
           {/* My Profile */}
           <div>
             <h2 className="text-xl font-normal text-gray-600 mb-6 tracking-wide">
               MY PROFILE
             </h2>
-            <div className=" flex flex-col md:flex-row items-center gap-8">
+            <div className="flex flex-col md:flex-row items-center gap-8">
               <img
                 src="https://wallpapers.com/images/hd/yellow-ferrari-sports-car-front-view-00xjwnmlnze0mzij.jpg"
-                alt="Profile placeholder (yellow sports car)"
+                alt="Profile placeholder"
                 className="w-64 h-48 object-cover shadow-sm"
               />
               <div className="space-y-4 text-sm font-light">
                 <Link to="/profile-edit">
-                  <a
-                    href="#"
-                    className="flex items-center gap-2 text-gray-700 hover:underline tracking-wide"
-                  >
+                  <span className="flex items-center gap-2 text-gray-700 hover:underline tracking-wide cursor-pointer">
                     <FilePenLine size={14} /> Edit Username/Password
-                  </a>
+                  </span>
                 </Link>
-                <a
-                  href="#"
-                  className="flex items-center gap-2 text-gray-700 hover:underline tracking-wide"
-                >
-                  <FilePenLine size={14} /> Edit Contact Information
-                </a>
+                <Link to="/profile-edit">
+                  <span className="flex items-center gap-2 text-gray-700 hover:underline tracking-wide cursor-pointer">
+                    <FilePenLine size={14} /> Edit Contact Information
+                  </span>
+                </Link>
               </div>
             </div>
           </div>
@@ -62,52 +136,36 @@ const Profile = () => {
             <h2 className="text-xl font-normal text-gray-600 mb-6 tracking-wide">
               HOW DOES IT WORK?
             </h2>
-            <div className="">
-              <p className="text-gray-700 leading-relaxed mb-6 font-light tracking-wide">
-                Getting started with the Elevator Design Studio (EDS) is easy.
-                In 10 simple steps, this tutorial will show you how to select
-                your elevator interior configuration, apply materials and
-                finishes, view your progress with realistic renderings, and
-                manage your project from a single location.{" "}
-                <span
-                  href="#"
-                  className="text-gray-500 font-light tracking-wide leading-relaxed text-sm"
-                >
-                  MORE
-                </span>{" "}
-              </p>
-              <Link to="/how-does-it-work">
-                <img
-                  src="/Howorks.jpg"
-                  alt="Designer working on computer with design software"
-                  className="w-full shadow-sm"
-                />
-              </Link>
-            </div>
+            <p className="text-gray-700 leading-relaxed mb-6 font-light tracking-wide">
+              Getting started with the Elevator Design Studio (EDS) is easy...
+            </p>
+            <Link to="/how-does-it-work">
+              <img
+                src="/Howorks.jpg"
+                alt="Designer working"
+                className="w-full shadow-sm"
+              />
+            </Link>
           </div>
         </div>
 
-        {/* Divider */}
         <hr className="max-w-6xl mx-auto border-t border-gray-300 mb-16" />
 
-        {/* Bottom Section: Create New Project + My Projects */}
+        {/* Bottom Section */}
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
-          {/* Create a New Project */}
+          {/* Create New Project – now clickable */}
           <div>
             <h2 className="text-xl font-normal text-gray-600 mb-6 tracking-wide">
               CREATE A NEW PROJECT
             </h2>
-            <div className=" border flex flex-col md:flex-row items-center justify-center gap-8">
-              <img
-                src="https://media.istockphoto.com/id/516160935/vector/vector-add-cancel-plus-and-minus-signs-on-buttons.jpg?s=612x612&w=0&k=20&c=73ePIeB81zGtJPlMgA_cgHwVjk8DgmxDpPnTEV-2zTs="
-                alt="Large plus button to create new project"
-                className="w-48 h-48 object-contain"
-              />
-              <img
-                src="https://static.vecteezy.com/system/resources/previews/034/132/743/non_2x/point-and-click-with-this-3d-realistic-mouse-cursor-icon-png.png"
-                alt="Mouse cursor clicking"
-                className="w-32 h-32 object-contain"
-              />
+            <div
+              className="border flex flex-col md:flex-row items-center justify-center gap-8 p-8 cursor-pointer hover:bg-gray-100 transition"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <PlusCircle size={120} className="text-gray-400" />
+              <p className="text-gray-500 font-light">
+                Click to start a new project
+              </p>
             </div>
           </div>
 
@@ -116,50 +174,151 @@ const Profile = () => {
             <h2 className="text-xl font-normal text-gray-600 mb-6 tracking-wide">
               MY PROJECTS
             </h2>
-            <div className="">
-              <p className="text-gray-700 leading-relaxed mb-8 font-light tracking-wide">
-                Just click on any project thumbnail to open it and access its
-                corresponding Elevator Design Studio (EDS) designs, or start an
-                entirely new project. Saved projects icons allow you to directly
-                access some project-specific features such as: edit, create new
-                EDS design, duplicate, and delete.
-              </p>
 
-              {/* Sorting & Search */}
-              <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="mb-6 md:mb-0">
-                  <span className="font-light mr-4 tracking-wide">SORTING</span>
-                  <div className="inline-flex gap-2 mt-3">
-                    <button className="px-2 py-1 border border-gray-300 font-light tracking-wide">
-                      ↑↓
-                    </button>
-                    <button className="px-2 py-1 border border-gray-300 font-light tracking-wide">
-                      A-Z
-                    </button>
-                    <button className="px-2 py-1 border border-gray-300 font-light tracking-wide">
-                      Date
-                    </button>
-                    <button className="px-2 py-1 border border-gray-300 font-light tracking-wide">
-                      Custom
-                    </button>
-                  </div>
+            <p className="text-gray-700 leading-relaxed mb-8 font-light tracking-wide">
+              Click on any project to open it...
+            </p>
+
+            {/* Sorting & Search */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
+              <div>
+                <span className="font-light mr-4 tracking-wide">SORTING</span>
+                <div className="inline-flex gap-2 mt-2">
+                  <button
+                    onClick={() => setSortMode("date")}
+                    className={`px-3 py-1 border font-light tracking-wide ${
+                      sortMode === "date" ? "bg-gray-200" : ""
+                    }`}
+                  >
+                    Date
+                  </button>
+                  <button
+                    onClick={() => setSortMode("az")}
+                    className={`px-3 py-1 border font-light tracking-wide ${
+                      sortMode === "az" ? "bg-gray-200" : ""
+                    }`}
+                  >
+                    A-Z
+                  </button>
+                  <button
+                    onClick={() => setSortMode("za")}
+                    className={`px-3 py-1 border font-light tracking-wide ${
+                      sortMode === "za" ? "bg-gray-200" : ""
+                    }`}
+                  >
+                    Z-A
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <span className="font-light mr-4 tracking-wide">SEARCH</span>
+                <input
+                  type="text"
+                  placeholder="Enter Project Name"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="px-4 py-2 border border-gray-300 mt-2 w-64 font-light tracking-wide"
+                />
+              </div>
+            </div>
+
+            {/* Project List */}
+            {projectLoading ? (
+              <>
+                {/* Replace the grid div with: */}
+                <ProjectsGrid
+                  projects={filteredAndSortedProjects}
+                  isLoading={projectLoading}
+                  onProjectClick={(projectId) =>
+                    navigate(`/project/${projectId}`)
+                  }
+                />
+              </>
+            ) : filteredAndSortedProjects.length === 0 ? (
+              <p className="text-center text-gray-500">No projects found</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {filteredAndSortedProjects.map((proj) => (
+                  <Link
+                    key={proj._id}
+                    to={`/project/${proj._id}`}
+                    className="block border rounded shadow hover:shadow-lg transition"
+                  >
+                    <div className="p-4">
+                      <h3 className="font-medium text-lg">{proj.name}</h3>
+                      <p className="text-sm text-gray-600">
+                        Company: {proj.company}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Created: {new Date(proj.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Create Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-lg w-full max-w-md">
+              <h3 className="text-xl font-semibold mb-6">Create New Project</h3>
+              <form onSubmit={handleCreateProject} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Project Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="w-full border px-3 py-2 rounded"
+                    placeholder="e.g. Residential Tower Lift"
+                    required
+                  />
                 </div>
 
                 <div>
-                  <span className="font-light mr-4 tracking-wide">
-                    SEARCH PROJECTS
-                  </span>
+                  <label className="block text-sm font-medium mb-1">
+                    Company Name
+                  </label>
                   <input
                     type="text"
-                    placeholder="Enter Project Name"
-                    className="px-4 py-2 border border-gray-300 mt-3 w-64 font-light tracking-wide"
+                    value={formData.company}
+                    onChange={(e) =>
+                      setFormData({ ...formData, company: e.target.value })
+                    }
+                    className="w-full border px-3 py-2 rounded"
+                    placeholder="e.g. ABC Elevators Pvt Ltd"
+                    required
                   />
                 </div>
-              </div>
+
+                <div className="flex gap-4 mt-6">
+                  <button
+                    type="submit"
+                    disabled={projectLoading}
+                    className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {projectLoading ? "Creating..." : "Create Project"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="flex-1 border py-2 rounded hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        </div>
-        <ProjectsGrid/>
+        )}
       </div>
     </>
   );
