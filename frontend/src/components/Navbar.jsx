@@ -157,7 +157,7 @@ const handleLogout = () => {
 
       {/* SIDEBAR MENU */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-gray-100 to-gray-200 text-gray-800 shadow-2xl z-50 transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-gray-100 to-gray-200 text-gray-800 shadow-2xl z-50 transform transition-transform duration-300 overflow-y-scroll ${
           isSidebarOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

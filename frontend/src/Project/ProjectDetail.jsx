@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
 import {
+  addSubproject,
+  deleteProject,
+  duplicateProject,
   getProjectById,
   projectReset,
 } from "../redux/features/Project/projectSlice"; // adjust path
@@ -15,8 +18,13 @@ const ProjectDetail = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { currentProject, projectLoading, projectError, projectMessage } =
-    useSelector((state) => state.project);
+  const {
+    currentProject,
+    projectLoading,
+    projectError,
+    projectMessage,
+    projectSuccess,
+  } = useSelector((state) => state.project);
 
   // Fetch project when component mounts or id changes
   useEffect(() => {
@@ -27,6 +35,27 @@ const ProjectDetail = () => {
       dispatch(projectReset()); // cleanup
     };
   }, [dispatch, id]);
+
+  useEffect(() => {
+    if (projectSuccess && projectMessage?.includes("deleted")) {
+      toast.success("Project deleted");
+      navigate("/profile");
+      dispatch(projectReset());
+    }
+    if (projectSuccess && projectMessage?.includes("duplicated")) {
+      toast.success("Project duplicated");
+      // Optional: navigate to new project if you get the new ID back
+    }
+    if (projectSuccess && projectMessage?.includes("added")) {
+      toast.success("New design added");
+      dispatch(getProjectById(id)); // refresh list
+    }
+
+    if (projectError) {
+      toast.error(projectMessage || "Operation failed");
+      dispatch(projectReset());
+    }
+  }, [projectSuccess, projectError, projectMessage, navigate, dispatch, id]);
 
   // Toast feedback
   useEffect(() => {
@@ -85,16 +114,51 @@ const ProjectDetail = () => {
               />
 
               <div className="grid grid-cols-1 gap-2 text-sm text-gray-500 text-[12px]">
-                <button className="flex items-center hover:text-gray-900 underline cursor-pointer">
+                <button
+                  onClick={() => {
+                    // Simple default — you can later show a small modal if needed
+                    dispatch(
+                      addSubproject({
+                        projectId: id,
+                        subData: { elevatorName: "New Elevator" },
+                      }),
+                    );
+                  }}
+                  className="flex items-center hover:text-gray-900 underline cursor-pointer"
+                >
                   <IoAddCircleOutline />
                   ADD ELEVATOR INTERIOR
                 </button>
 
-                <button className="flex items-center hover:text-gray-900 underline cursor-pointer">
+                <button
+                  onClick={() => {
+                    const newName = prompt(
+                      "Enter name for duplicated project:",
+                      `${projectName} (Copy)`,
+                    );
+                    if (newName && newName.trim()) {
+                      dispatch(
+                        duplicateProject({ id, newName: newName.trim() }),
+                      );
+                    }
+                  }}
+                  className="flex items-center hover:text-gray-900 underline cursor-pointer"
+                >
                   <IoCopyOutline /> DUPLICATE PROJECT
                 </button>
 
-                <button className="flex items-center hover:text-gray-900 underline cursor-pointer">
+                <button
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "Delete this project and all its designs? This cannot be undone.",
+                      )
+                    ) {
+                      dispatch(deleteProject(id));
+                    }
+                  }}
+                  className="flex items-center hover:text-gray-900 underline cursor-pointer"
+                >
                   <MdDeleteForever /> DELETE PROJECT
                 </button>
               </div>
@@ -176,9 +240,11 @@ const ProjectDetail = () => {
           </div>
         </div>
       </div>
-
       {/* Sub projects section */}
-      <SubProjectDetail />
+      {/* // Instead of <SubProjectDetail /> */}
+      {currentProject?.subprojects?.map((sub) => (
+        <SubProjectDetail key={sub._id} subproject={sub} projectId={id} />
+      ))}
     </section>
   );
 };

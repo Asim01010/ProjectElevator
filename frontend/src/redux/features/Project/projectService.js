@@ -1,4 +1,3 @@
-
 // src/redux/features/Project/projectService.js
 import axios from "axios";
 
@@ -22,7 +21,9 @@ export const createProjectService = async (projectData) => {
     const response = await axios.post(API_URL, projectData, getAuthHeaders());
     return response.data.project;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to create project");
+    throw new Error(
+      error.response?.data?.message || "Failed to create project",
+    );
   }
 };
 
@@ -35,7 +36,9 @@ export const getUserProjectsService = async (params = {}) => {
     });
     return response.data.projects;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to fetch projects");
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch projects",
+    );
   }
 };
 
@@ -52,10 +55,16 @@ export const getProjectByIdService = async (id) => {
 // Update project
 export const updateProjectService = async (id, projectData) => {
   try {
-    const response = await axios.patch(`${API_URL}${id}`, projectData, getAuthHeaders());
+    const response = await axios.patch(
+      `${API_URL}${id}`,
+      projectData,
+      getAuthHeaders(),
+    );
     return response.data.project;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to update project");
+    throw new Error(
+      error.response?.data?.message || "Failed to update project",
+    );
   }
 };
 
@@ -65,56 +74,105 @@ export const deleteProjectService = async (id) => {
     const response = await axios.delete(`${API_URL}${id}`, getAuthHeaders());
     return response.data; // { message }
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to delete project");
+    throw new Error(
+      error.response?.data?.message || "Failed to delete project",
+    );
   }
 };
 
 // Duplicate project
 export const duplicateProjectService = async (id, { newName }) => {
   try {
-    const response = await axios.post(`${API_URL}${id}/duplicate`, { newName }, getAuthHeaders());
+    const response = await axios.post(
+      `${API_URL}${id}/duplicate`,
+      { newName },
+      getAuthHeaders(),
+    );
     return response.data.project;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to duplicate project");
+    throw new Error(
+      error.response?.data?.message || "Failed to duplicate project",
+    );
   }
 };
 
 // Add new subproject
 export const addSubprojectService = async (projectId, subData = {}) => {
   try {
-    const response = await axios.post(`${API_URL}${projectId}/subprojects`, subData, getAuthHeaders());
+    const response = await axios.post(
+      `${API_URL}${projectId}/subprojects`,
+      subData,
+      getAuthHeaders(),
+    );
     return response.data.subproject;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to add subproject");
+    throw new Error(
+      error.response?.data?.message || "Failed to add subproject",
+    );
   }
 };
 
 // Update subproject
 export const updateSubprojectService = async (projectId, subId, subData) => {
   try {
-    const response = await axios.patch(`${API_URL}${projectId}/subprojects/${subId}`, subData, getAuthHeaders());
+    const response = await axios.patch(
+      `${API_URL}${projectId}/subprojects/${subId}`,
+      subData,
+      getAuthHeaders(),
+    );
     return response.data.subproject;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to update subproject");
+    throw new Error(
+      error.response?.data?.message || "Failed to update subproject",
+    );
   }
 };
 
 // Delete subproject
 export const deleteSubprojectService = async (projectId, subId) => {
   try {
-    const response = await axios.delete(`${API_URL}${projectId}/subprojects/${subId}`, getAuthHeaders());
+    const response = await axios.delete(
+      `${API_URL}${projectId}/subprojects/${subId}`,
+      getAuthHeaders(),
+    );
     return response.data; // { message }
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to delete subproject");
+    throw new Error(
+      error.response?.data?.message || "Failed to delete subproject",
+    );
   }
 };
 
 // Duplicate subproject
-export const duplicateSubprojectService = async (projectId, subId, { newElevatorName }) => {
+export const duplicateSubprojectService = async (
+  projectId,
+  subId,
+  { newElevatorName },
+) => {
   try {
-    const response = await axios.post(`${API_URL}${projectId}/subprojects/${subId}/duplicate`, { newElevatorName }, getAuthHeaders());
+    const response = await axios.post(
+      `${API_URL}${projectId}/subprojects/${subId}/duplicate`,
+      { newElevatorName },
+      getAuthHeaders(),
+    );
     return response.data.subproject;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Failed to duplicate subproject");
+    throw new Error(
+      error.response?.data?.message || "Failed to duplicate subproject",
+    );
+  }
+};
+// Add to projectService.js first (if not already there)
+export const getSubprojectByIdService = async (subprojectId) => {
+  try {
+    const response = await axios.get(
+      `${API_URL.replace("/projects/", "/subprojects/")}${subprojectId}`,
+      getAuthHeaders(),
+    );
+    return response.data.subproject;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch subproject",
+    );
   }
 };

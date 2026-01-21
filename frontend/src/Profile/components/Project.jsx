@@ -1,128 +1,118 @@
 // src/pages/components/Project.jsx
 import React from "react";
-import { Pencil, PlusCircle, Copy, Trash2 } from "lucide-react";
+import { BookCopy, CirclePlus, Pencil, Trash2 } from "lucide-react";
 
 const Project = ({
+  projectId,
   name = "Untitled Project",
   company = "No Company",
   createdAt,
   updatedAt,
   subprojectsCount = 0,
-  status = "In Progress", // "In Progress", "Complete", "Draft", etc.
-  color = "green", // fallback color
+  onEdit,
+  onDelete,
+  onDuplicate,
+  onAddDesign,
 }) => {
-  const createdDate = createdAt
-    ? new Date(createdAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "N/A";
-
-  const lastEdited = updatedAt
-    ? new Date(updatedAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "Never";
-
-  // Dynamic status badge styling
-  const statusStyles = {
-    "In Progress": "bg-yellow-100 text-yellow-800 border-yellow-300",
-    Complete: "bg-green-100 text-green-800 border-green-300",
-    Draft: "bg-gray-100 text-gray-800 border-gray-300",
-  };
-
-  const badgeClass =
-    statusStyles[status] || "bg-gray-100 text-gray-800 border-gray-300"; // fallback
+  const projectNumber = subprojectsCount;
 
   return (
-    <div className="group bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
-      {/* Header: Status dot + Name */}
-      <div className="flex items-center gap-3 px-5 py-3.5 bg-gray-50/80 border-b border-gray-200">
-        <div
-          className={`h-3.5 w-3.5 rounded-full bg-${color}-500 ring-2 ring-${color}-200 ring-offset-2 flex-shrink-0`}
-        ></div>
-        <h3 className="font-medium text-gray-900 truncate text-lg leading-tight">
-          {name}
-        </h3>
+    <div className="   w-50">
+      {/* Header with green indicator and project name */}
+      <div className="flex items-center gap-2    border-b border-gray-300">
+        <div className="h-3 w-3 bg-[#8dc63f]"></div>
+        <span className="text-sm text-gray-700 truncate">{name}</span>
       </div>
 
-      {/* Visual / Preview Area */}
-      <div
-        className={`relative flex-1 bg-gradient-to-br from-${color}-50 via-${color}-100 to-${color}-200 min-h-[160px] flex items-center justify-center overflow-hidden`}
-      >
-        {/* Number of designs badge */}
-        <div className="text-center z-10">
-          <div className="text-6xl font-bold text-white drop-shadow-lg opacity-90">
-            {subprojectsCount}
+      {/* Main green geometric design area */}
+      <div className="relative bg-gradient-to-r from-[#8dc63f] to-green-[#8dc63f] h-30 flex items-center justify-center overflow-hidden">
+        {/* Background geometric shapes */}
+        <div className="absolute inset-0 flex">
+          {/* Left dark green panel */}
+          <div className="w-1/3 bg-[#8dc63f] opacity-60"></div>
+
+          {/* Middle section with pentagon shapes */}
+          <div className="w-1/3 relative">
+            {/* Top pentagon */}
+            <div
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-20 bg-[#acc687] opacity-70"
+              style={{
+                clipPath:
+                  "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+              }}
+            ></div>
+            {/* Bottom pentagon */}
+            <div
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-24 bg-[#a9c188] opacity-60"
+              style={{
+                clipPath:
+                  "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+              }}
+            ></div>
           </div>
-          <p className="text-base font-light text-white mt-1 opacity-90 tracking-wide">
-            {subprojectsCount === 1 ? "Design" : "Designs"}
-          </p>
+
+          {/* Right light green panel with pentagon */}
+          <div className="w-1/3 relative bg-[#DDEDC6] opacity-70">
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white opacity-80"
+              style={{
+                clipPath:
+                  "polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)",
+              }}
+            ></div>
+          </div>
         </div>
 
-        {/* Status badge */}
-        <span
-          className={`absolute bottom-4 right-4 px-3.5 py-1.5 rounded-full text-xs font-medium border shadow-sm ${badgeClass}`}
-        >
-          {status}
-        </span>
-
-        {/* Subtle overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
-      </div>
-
-      {/* Info Section */}
-      <div className="p-5 flex flex-col gap-3.5 text-sm flex-grow">
-        <div className="flex items-center justify-between">
-          <span className="font-medium text-gray-700">Company:</span>
-          <span className="text-gray-600 truncate max-w-[65%] text-right">
-            {company}
-          </span>
-        </div>
-
-        <div className="text-xs text-gray-500 space-y-1">
-          <div>
-            <span className="font-medium text-gray-600">Created:</span>{" "}
-            {createdDate}
-          </div>
-          <div>
-            <span className="font-medium text-gray-600">Last edited:</span>{" "}
-            {lastEdited}
-          </div>
+        {/* White circle with project number */}
+        <div className="relative z-10 h-16 w-16 rounded-full bg-white flex items-center justify-center shadow-md">
+          <span className="text-2xl text-gray-700">{projectNumber}</span>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center justify-around px-5 py-4 border-t border-gray-100 bg-gray-50/50">
+      {/* Action buttons */}
+      <div className="flex items-center justify-around py-3 border-t border-gray-300">
         <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit?.(projectId);
+          }}
+          className="text-gray-500 hover:text-gray-600"
           title="Edit Project"
-          className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
         >
-          <Pencil size={18} />
+          <Pencil className="h-4 w-4" />
         </button>
 
         <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddDesign?.(projectId);
+          }}
+          className="text-gray-500 hover:text-gray-600"
           title="Add New Design"
-          className="p-2 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-full transition-colors"
         >
-          <PlusCircle size={18} />
+          <CirclePlus className="h-4 w-4" />
         </button>
 
         <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate?.(projectId);
+          }}
+          className="text-gray-500 hover:text-gray-600"
           title="Duplicate Project"
-          className="p-2 text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-full transition-colors"
         >
-          <Copy size={18} />
+          <BookCopy className="h-4 w-4" />
         </button>
 
         <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete?.(projectId);
+          }}
+          className="text-gray-500 hover:text-gray-600"
           title="Delete Project"
-          className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
         >
-          <Trash2 size={18} />
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
     </div>

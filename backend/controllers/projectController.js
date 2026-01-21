@@ -55,7 +55,7 @@ export const getUserProjects = async (req, res) => {
       sort = { updatedAt: -1 };
     }
 
-    const projects = await Project.find(query).sort(sort);
+    const projects = await Project.find(query).sort(sort).lean(); // faster
 
     res.status(200).json({
       success: true,
@@ -213,6 +213,61 @@ export const duplicateProject = async (req, res) => {
   }
 };
 
+// Get single subproject by its own ID (for /design/:subprojectId)
+// GET /api/subprojects/:subprojectId   (or /api/design/:subprojectId)
+export const getSubprojectById = async (req, res) => {
+  try {
+    const { subprojectId } = req.params;
+
+    const project = await Project.findOne(
+      { "subprojects._id": subprojectId },
+      {
+        "subprojects.$": 1,          // projection: only the matching subproject
+        name: 1,
+        company: 1,
+        user: 1,                     // include project context if design page needs it
+        specifier: 1,
+        jobLocation: 1,
+      }
+    );
+
+    if (!project || project.subprojects.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Subproject/design not found",
+      });
+    }
+
+    const subproject = project.subprojects[0];
+
+    // Authorization: check user owns the parent project
+    if (project.user.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to access this design",
+      });
+    }
+
+    // Return subproject + some project context (optional but often useful)
+    res.status(200).json({
+      success: true,
+      subproject: {
+        ...subproject.toObject(),
+        projectId: project._id,
+        projectName: project.name,
+        // add other project fields if frontend needs them on design page
+      },
+    });
+  } catch (error) {
+    console.error("Get subproject error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error fetching design",
+    });
+  }
+};
+
+
 // Add new subproject (POST /api/projects/:id/subprojects)
 export const addSubproject = async (req, res) => {
   try {
@@ -225,18 +280,27 @@ export const addSubproject = async (req, res) => {
       });
     }
 
-    // Default new subproject; can override with req.body if provided
+    // Default new subproject + allow overrides from body
     const newSub = {
-      ...req.body, // Allow overriding defaults
+      elevatorName: "New Elevator",   // optional: explicit default
+      quantity: 1,
+      openingOption: "Front",
+      status: "In Progress",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      ...req.body,                    // overrides if provided
     };
 
     project.subprojects.push(newSub);
     project.updatedAt = Date.now();
     await project.save();
 
+    // Return the newly added one (last in array)
+    const addedSubproject = project.subprojects[project.subprojects.length - 1];
+
     res.status(201).json({
       success: true,
-      subproject: project.subprojects[project.subprojects.length - 1],
+      subproject: addedSubproject,
     });
   } catch (error) {
     console.error("Add subproject error:", error);
@@ -333,7 +397,8 @@ export const deleteSubproject = async (req, res) => {
       });
     }
 
-    subproject.deleteOne();
+    // Better / more explicit way
+    project.subprojects.pull({ _id: req.params.subId });
     project.updatedAt = Date.now();
     await project.save();
 

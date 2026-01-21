@@ -12,6 +12,7 @@ import {
   updateSubproject,
   deleteSubproject,
   duplicateSubproject,
+  getSubprojectById,
 } from "../controllers/projectController.js";
 
 const router = express.Router();
@@ -36,5 +37,5 @@ router
   .delete(protect, deleteSubproject);
 
 router.post("/:id/subprojects/:subId/duplicate", protect, duplicateSubproject);
-
+router.get("/subprojects/:subprojectId", protect, getSubprojectById);
 export default router;

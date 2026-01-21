@@ -30,7 +30,7 @@ const App = () => {
         <Route path="/project/:id" element={<ProjectDetail />} />
         <Route path="/elevator-designer" element={<ElevatorDesigner />} />
         <Route path="/elevator-designer2" element={<ElevatorDesigner2 />} />
-        <Route path="/elevator-designer3" element={<ElevatorDesigner3 />} />
+        <Route path="/design/:id" element={<ElevatorDesigner3 />} />
         <Route path="/verify-otp" element={<OTP />} />
         {/* Add this route */}
       </Routes>

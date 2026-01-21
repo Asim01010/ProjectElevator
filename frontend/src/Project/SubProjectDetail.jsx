@@ -1,9 +1,49 @@
 import React from 'react'
 import { HiDownload } from "react-icons/hi";
 import { IoCopyOutline } from "react-icons/io5";
-
+import { useNavigate } from "react-router-dom"; // ← add
+import { useDispatch } from "react-redux"; // ← add
 import { MdDeleteForever, MdOutlineModeEdit } from "react-icons/md";
-const SubProjectDetail = () => {
+import { deleteSubproject, duplicateSubproject } from '../redux/features/Project/projectSlice';
+const SubProjectDetail = ({
+  subproject, // ← we will pass this
+  projectId, // ← we will pass this
+}) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  if (!subproject) {
+    return <div className="p-8 text-center">No design selected</div>;
+  }
+
+  const handleDelete = () => {
+    if (window.confirm("Delete this design? This cannot be undone.")) {
+      dispatch(deleteSubproject({ projectId, subId: subproject._id }));
+    }
+  };
+
+  const handleDuplicate = () => {
+    const newName = prompt(
+      "New elevator name:",
+      `${subproject.elevatorName} (Copy)`,
+    );
+    if (newName && newName.trim()) {
+      dispatch(
+        duplicateSubproject({
+          projectId,
+          subId: subproject._id,
+          newElevatorName: newName.trim(),
+        }),
+      );
+    }
+  };
+
+  const handleEdit = () => {
+    navigate(`/design/${subproject._id}`);
+  };
+
+  // ... your existing JSX stays exactly the same ...
+
   return (
     <div className="w-[70%] border-b border-e border-s bg-[#F1F2F2]">
       <div className="grid grid-cols-3 gap-6  text-[12px] text-gray-700">
@@ -22,15 +62,16 @@ const SubProjectDetail = () => {
 
           <div className="mt-4 space-y-2 p-4">
             <p>
-              <strong>CREATED:</strong> 12.21.2025 04:24:40 PM
+              <strong>CREATED:</strong>{" "}
+              {new Date(subproject.createdAt).toLocaleString()}
             </p>
             <p>
-              <strong>MODIFIED:</strong> 01.18.2026 02:10:28 PM
+              <strong>MODIFIED:</strong>{" "}
+              {new Date(subproject.updatedAt).toLocaleString()}
             </p>
             <p>
-              <strong>STATUS:</strong> In Progress
+              <strong>STATUS:</strong> {subproject.status || "In Progress"}
             </p>
-
             <p className="mt-2 leading-relaxed text-gray-500">
               Your elevator interior design status will change from 'In
               Progress' to 'Complete' once you reach 'Step Five: Review'. This
@@ -50,13 +91,22 @@ const SubProjectDetail = () => {
                 </button>
               </div>
               <div className="flex flex-col justify-center gap-2">
-                <button className="flex items-center gap-2 text-gray-500 hover:text-gray-800 underline text-[12px]">
+                <button
+                  onClick={handleEdit}
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-800 underline text-[12px]"
+                >
                   <MdOutlineModeEdit /> EDIT DESIGN
                 </button>
-                <button className="flex items-center gap-2 text-gray-500 hover:text-gray-800 underline text-[12px]">
+                <button
+                  onClick={handleDuplicate}
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-800 underline text-[12px]"
+                >
                   <IoCopyOutline /> DUPLICATE
                 </button>
-                <button className="flex items-center gap-2 text-gray-500 hover:text-gray-800 underline text-[12px]">
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center gap-2 text-gray-500 hover:text-gray-800 underline text-[12px]"
+                >
                   <MdDeleteForever /> DELETE DESIGN
                 </button>
               </div>
@@ -73,7 +123,8 @@ const SubProjectDetail = () => {
             </label>
             <input
               type="text"
-              value="LEVEL-e-102 #2"
+              value={subproject.elevatorName || ""}
+              readOnly
               className="flex-1 border px-2 py-1 bg-white text-[12px]"
             />
           </div>
@@ -217,6 +268,6 @@ const SubProjectDetail = () => {
       </div>
     </div>
   );
-}
+};
 
 export default SubProjectDetail
