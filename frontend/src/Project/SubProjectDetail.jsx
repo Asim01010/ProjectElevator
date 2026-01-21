@@ -1,14 +1,15 @@
-import React from 'react'
+import React from "react";
 import { HiDownload } from "react-icons/hi";
 import { IoCopyOutline } from "react-icons/io5";
-import { useNavigate } from "react-router-dom"; // ← add
-import { useDispatch } from "react-redux"; // ← add
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { MdDeleteForever, MdOutlineModeEdit } from "react-icons/md";
-import { deleteSubproject, duplicateSubproject } from '../redux/features/Project/projectSlice';
-const SubProjectDetail = ({
-  subproject, // ← we will pass this
-  projectId, // ← we will pass this
-}) => {
+import {
+  deleteSubproject,
+  duplicateSubproject,
+} from "../redux/features/Project/projectSlice";
+
+const SubProjectDetail = ({ subproject, projectId }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -42,12 +43,10 @@ const SubProjectDetail = ({
     navigate(`/design/${subproject._id}`);
   };
 
-  // ... your existing JSX stays exactly the same ...
-
   return (
-    <div className="w-[70%] border-b border-e border-s bg-[#F1F2F2]">
-      <div className="grid grid-cols-3 gap-6  text-[12px] text-gray-700">
-        {/* Column 1 - Left Preview Section */}
+    <div className="w-[90%] lg:w-[70%] border-b border-e border-s bg-[#F1F2F2]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-[12px] text-gray-700">
+        {/* Column 1 */}
         <div>
           <div className="relative mt-3">
             <img
@@ -78,7 +77,7 @@ const SubProjectDetail = ({
               will activate the download links below.
             </p>
 
-            <div className="mt-4 grid grid-cols-2 gap-2">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="flex flex-col gap-2">
                 <button className="flex uppercase items-center gap-2 text-gray-500 hover:text-gray-800 underline text-[12px]">
                   <HiDownload /> Overview PDF
@@ -114,9 +113,8 @@ const SubProjectDetail = ({
           </div>
         </div>
 
-        {/* Column 2 - Left Form Column */}
+        {/* Column 2 */}
         <div className="flex flex-col gap-2 py-4">
-          {/* Elevator Name */}
           <div className="flex items-center">
             <label className="whitespace-nowrap font-semibold text-[12px] w-[140px]">
               ELEVATOR NAME:
@@ -129,7 +127,6 @@ const SubProjectDetail = ({
             />
           </div>
 
-          {/* Configuration */}
           <div className="flex items-center">
             <label className="whitespace-nowrap font-semibold text-[12px] w-[140px]">
               CONFIGURATION:
@@ -137,7 +134,6 @@ const SubProjectDetail = ({
             <p className="text-[12px]">LEVEL-e-102</p>
           </div>
 
-          {/* Frame Style */}
           <div className="flex items-center">
             <label className="whitespace-nowrap font-semibold text-[12px] w-[140px]">
               FRAME STYLE:
@@ -145,7 +141,6 @@ const SubProjectDetail = ({
             <p className="text-[12px]">Minimal</p>
           </div>
 
-          {/* Lightplane */}
           <div className="flex items-center">
             <label className="whitespace-nowrap font-semibold text-[12px] w-[140px]">
               LIGHTPLANE:
@@ -156,8 +151,7 @@ const SubProjectDetail = ({
             </div>
           </div>
 
-          {/* Dimensions Box */}
-          <div className="border p-3 grid grid-cols-2 gap-2">
+          <div className="border p-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="flex items-center gap-2">
               <span className="border px-2 py-1 text-[12px]">D1</span>
               <span className="text-[12px]">DEPTH:</span>
@@ -175,14 +169,13 @@ const SubProjectDetail = ({
               <span className="text-[12px]">CEILING HEIGHT:</span>
             </div>
 
-            <div className="col-span-2 mt-2">
+            <div className="col-span-1 sm:col-span-2 mt-2">
               <button className="bg-lime-500 text-white px-5 py-2 font-semibold text-[12px]">
                 EDIT CAB DIMENSIONS
               </button>
             </div>
           </div>
 
-          {/* Opening Option */}
           <div className="flex items-center">
             <label className="whitespace-nowrap font-semibold text-[12px] w-[140px]">
               OPENING OPTION: <span className="text-red-500">*</span>
@@ -192,7 +185,6 @@ const SubProjectDetail = ({
             </select>
           </div>
 
-          {/* Quantity */}
           <div className="flex items-center">
             <label className="font-semibold text-[12px] w-[140px]">
               QUANTITY: <span className="text-red-500">*</span>
@@ -205,9 +197,8 @@ const SubProjectDetail = ({
           </div>
         </div>
 
-        {/* Column 3 - Right Form Column */}
+        {/* Column 3 */}
         <div className="flex flex-col gap-4 py-4 px-2">
-          {/* Job Type */}
           <div className="flex items-center">
             <label className="font-semibold text-[12px] whitespace-nowrap w-[140px]">
               JOB TYPE:
@@ -217,7 +208,6 @@ const SubProjectDetail = ({
             </select>
           </div>
 
-          {/* Elevator Type */}
           <div className="flex items-center">
             <label className="font-semibold text-[12px] whitespace-nowrap w-[140px]">
               ELEVATOR TYPE:
@@ -227,7 +217,6 @@ const SubProjectDetail = ({
             </select>
           </div>
 
-          {/* Shell Material */}
           <div className="flex items-center">
             <label className="font-semibold text-[12px] whitespace-nowrap w-[140px]">
               SHELL MATERIAL:
@@ -237,7 +226,6 @@ const SubProjectDetail = ({
             </select>
           </div>
 
-          {/* Manufacturer */}
           <div className="flex items-center">
             <label className="font-semibold text-[12px] whitespace-nowrap w-[140px]">
               MANUFACTURER:
@@ -247,7 +235,6 @@ const SubProjectDetail = ({
             </select>
           </div>
 
-          {/* Comments */}
           <div className="flex items-start">
             <label className="font-semibold text-[12px] w-[140px]">
               COMMENTS:
@@ -258,7 +245,6 @@ const SubProjectDetail = ({
             ></textarea>
           </div>
 
-          {/* Mandatory Text */}
           <div className="text-red-500 text-[12px]">
             * Mandatory field
             <br />
@@ -270,4 +256,4 @@ const SubProjectDetail = ({
   );
 };
 
-export default SubProjectDetail
+export default SubProjectDetail;

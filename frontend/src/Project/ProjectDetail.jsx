@@ -8,13 +8,13 @@ import {
   duplicateProject,
   getProjectById,
   projectReset,
-} from "../redux/features/Project/projectSlice"; // adjust path
+} from "../redux/features/Project/projectSlice";
 import { IoAddCircleOutline, IoCopyOutline } from "react-icons/io5";
 import { MdDeleteForever } from "react-icons/md";
 import SubProjectDetail from "./SubProjectDetail";
 
 const ProjectDetail = () => {
-  const { id } = useParams(); // ← gets the :id from URL
+  const { id } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -26,13 +26,12 @@ const ProjectDetail = () => {
     projectSuccess,
   } = useSelector((state) => state.project);
 
-  // Fetch project when component mounts or id changes
   useEffect(() => {
     if (id) {
       dispatch(getProjectById(id));
     }
     return () => {
-      dispatch(projectReset()); // cleanup
+      dispatch(projectReset());
     };
   }, [dispatch, id]);
 
@@ -44,11 +43,10 @@ const ProjectDetail = () => {
     }
     if (projectSuccess && projectMessage?.includes("duplicated")) {
       toast.success("Project duplicated");
-      // Optional: navigate to new project if you get the new ID back
     }
     if (projectSuccess && projectMessage?.includes("added")) {
       toast.success("New design added");
-      dispatch(getProjectById(id)); // refresh list
+      dispatch(getProjectById(id));
     }
 
     if (projectError) {
@@ -57,12 +55,9 @@ const ProjectDetail = () => {
     }
   }, [projectSuccess, projectError, projectMessage, navigate, dispatch, id]);
 
-  // Toast feedback
   useEffect(() => {
     if (projectError) {
       toast.error(projectMessage || "Failed to load project");
-      // Optional: redirect back if project not found
-      // navigate("/profile");
     }
   }, [projectError, projectMessage, navigate]);
 
@@ -82,7 +77,6 @@ const ProjectDetail = () => {
     );
   }
 
-  // Use real data or fallbacks
   const projectName = currentProject?.name || "elevator_2";
   const company = currentProject?.company || "";
   const specifier = currentProject?.specifier || "";
@@ -95,17 +89,17 @@ const ProjectDetail = () => {
     : "N/A";
 
   return (
-    <section className="min-h-screen flex flex-col justify-start items-center py-24 border ">
-      <div className="w-[70%]">
+    <section className="min-h-screen flex flex-col justify-start items-center py-24 border">
+      <div className="w-[90%] lg:w-[70%]">
         {/* Header */}
         <h3 className="text-gray-500 text-lg mb-4">
           My Project | {projectName}
         </h3>
 
-        {/* Main Card - 3 Column Grid */}
+        {/* Main Card */}
         <div className="flex border bg-white">
-          <div className="grid grid-cols-3 gap-4 w-full p-4">
-            {/* Column 1 - Image and Buttons */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full p-4">
+            {/* Column 1 */}
             <div className="flex flex-col gap-2">
               <img
                 src="/Howorks.jpg"
@@ -116,7 +110,6 @@ const ProjectDetail = () => {
               <div className="grid grid-cols-1 gap-2 text-sm text-gray-500 text-[12px]">
                 <button
                   onClick={() => {
-                    // Simple default — you can later show a small modal if needed
                     dispatch(
                       addSubproject({
                         projectId: id,
@@ -164,8 +157,8 @@ const ProjectDetail = () => {
               </div>
             </div>
 
-            {/* Column 2 & 3 - Paragraph spanning full width */}
-            <div className="col-span-2 flex flex-col gap-4">
+            {/* Column 2 & 3 */}
+            <div className="lg:col-span-2 flex flex-col gap-4">
               <p className="text-gray-600 text-[12px] leading-relaxed">
                 Within a project you can create multiple elevator interior
                 designs. You can continue modifying them individually until you
@@ -175,52 +168,51 @@ const ProjectDetail = () => {
                 elevator interiors with a 'Complete' status within a project.
               </p>
 
-              {/* Form and Dates in 2 columns */}
-              <div className="grid grid-cols-2 gap-4 uppercase">
-                {/* Form inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 uppercase">
+                {/* Form */}
                 <div className="flex flex-col space-y-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
                       Project Name:
                     </label>
                     <input
                       type="text"
                       defaultValue={projectName}
-                      className="w-[60%] outline-none border border-gray-500"
+                      className="w-full sm:w-[60%] outline-none border border-gray-500"
                     />
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
                       Company:
                     </label>
                     <input
                       type="text"
                       defaultValue={company}
-                      className="w-[60%] outline-none border border-gray-500"
+                      className="w-full sm:w-[60%] outline-none border border-gray-500"
                     />
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
                       Specifier:
                     </label>
                     <input
                       type="text"
                       defaultValue={specifier}
-                      className="w-[60%] outline-none border border-gray-500"
+                      className="w-full sm:w-[60%] outline-none border border-gray-500"
                     />
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
                       Job Location:
                     </label>
                     <textarea
                       defaultValue={jobLocation}
-                      className="w-[60%] outline-none border border-gray-500"
+                      className="w-full sm:w-[60%] outline-none border border-gray-500"
                     />
                   </div>
                 </div>
 
-                {/* Created Dates */}
+                {/* Dates */}
                 <div className="flex flex-col justify-start gap-2">
                   <div className="flex items-center justify-between">
                     <label className="text-gray-600 text-[12px] font-semibold whitespace-nowrap">
@@ -240,8 +232,8 @@ const ProjectDetail = () => {
           </div>
         </div>
       </div>
-      {/* Sub projects section */}
-      {/* // Instead of <SubProjectDetail /> */}
+
+      {/* Sub projects */}
       {currentProject?.subprojects?.map((sub) => (
         <SubProjectDetail key={sub._id} subproject={sub} projectId={id} />
       ))}
