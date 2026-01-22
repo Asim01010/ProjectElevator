@@ -14,7 +14,7 @@ import {
   Home as HomeIcon,
 } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaPinterestP } from "react-icons/fa";
-import { IoMdLogOut } from "react-icons/io";
+import { AiOutlineLogout } from "react-icons/ai";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { userReset } from "../redux/features/Register/registerSlice"; // adjust path if needed
@@ -108,25 +108,25 @@ const handleLogout = () => {
           {/* Profile Icon linking to Profile page */}
           <Link to="/profile" className="relative group">
             <User
-              className="cursor-pointer text-gray-700 hover:text-gray-900 transition-colors"
-              size={22}
+              className="cursor-pointer text-gray-400 hover:text-gray-900 transition-colors"
+              size={40}
             />
-            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-gray-500 text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
               Profile
             </div>
           </Link>
-         
+
           {/* Logout Icon – NOW CLICKABLE */}
           <button
             onClick={handleLogout}
             className="relative group p-1 rounded-full hover:bg-gray-200 transition-colors"
             title="Logout"
           >
-            <IoMdLogOut
-              className="cursor-pointer text-gray-700 hover:text-black transition-colors"
-              size={24}
+            <AiOutlineLogout
+              className="cursor-pointer text-gray-400 hover:text-black transition-colors"
+              size={40}
             />
-            <div className="absolute -bottom-9 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            <div className="absolute -bottom-9 left-1/2 -translate-x-1/2 bg-gray-500 text-white text-xs px-3 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
               Logout
             </div>
           </button>
@@ -137,10 +137,10 @@ const handleLogout = () => {
             className="relative group p-2 rounded-lg hover:bg-gray-200 transition-colors"
           >
             <Menu
-              className="cursor-pointer text-gray-700 hover:text-gray-900 transition-colors"
-              size={22}
+              className="cursor-pointer text-gray-400 hover:text-gray-900 transition-colors"
+              size={40}
             />
-            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+            <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-400 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
               Menu
             </div>
           </button>

@@ -17,7 +17,7 @@ const Project = ({
   const projectNumber = subprojectsCount;
 
   return (
-    <div className="   w-50">
+    <div className=" w-50">
       {/* Header with green indicator and project name */}
       <div className="flex items-center gap-2    border-b border-gray-300">
         <div className="h-3 w-3 bg-[#8dc63f]"></div>

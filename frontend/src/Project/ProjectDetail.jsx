@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import { RingLoader } from "react-spinners";
+
 import {
   addSubproject,
   deleteProject,
@@ -64,7 +66,9 @@ const ProjectDetail = () => {
   if (projectLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg text-gray-600">Loading project...</p>
+        <p className="text-lg text-gray-600">
+          <RingLoader size={80}  />
+        </p>
       </div>
     );
   }

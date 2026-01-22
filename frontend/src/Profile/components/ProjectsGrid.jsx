@@ -1,6 +1,7 @@
 // src/pages/components/ProjectsGrid.jsx
 import React, { useMemo } from "react";
 import Project from "./Project";
+import { RingLoader } from "react-spinners";
 
 const ProjectsGrid = ({
   projects = [],
@@ -29,7 +30,7 @@ const ProjectsGrid = ({
     return (
       <div className="py-16 flex items-center justify-center">
         <p className="text-lg text-gray-600 animate-pulse font-light tracking-wide">
-          Loading your projects...
+          <RingLoader size={60} color="black" />
         </p>
       </div>
     );
@@ -54,7 +55,7 @@ const ProjectsGrid = ({
      
 
       {/* Projects Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 ">
         {projects.map((project) => (
           <div
             key={project._id}
