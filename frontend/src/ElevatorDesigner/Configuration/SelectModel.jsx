@@ -61,10 +61,10 @@ const ElevatorConfigurator = () => {
 
   return (
     <div
-      className="w-[40%] max-w-6xl mx-auto   overflow-y-scroll"
+      className="w-full max-w-6xl mx-auto   overflow-y-scroll"
       style={{ scrollbarWidth: "none" }}
     >
-      <div className="flex justify-between items-start mb-4 text-xs text-gray-500">
+      <div className="flex justify-between items-start mb-4 mt-2 text-xs text-gray-500">
         <p className="w-full">
           LEVELe pairs aluminum-framed panels with an interlocking grid system.
           Multiple configurations, each defined by wall panel shape and layout,
@@ -120,10 +120,7 @@ const ElevatorConfigurator = () => {
                       {/* Front Opening Option */}
                       <div
                         onClick={() => handleOpeningOptionClick("front")}
-                        className={`flex items-center p-1 border-2 cursor-pointer transition-all bg-white border-gray-300 hover:border-gray-400 text-black text-xs  py-2
-                    
-                          
-                      `}
+                        className={`flex items-center p-1 border-2 cursor-pointer transition-all bg-white border-gray-300 hover:border-gray-400 text-black text-xs  py-2`}
                       >
                         <div
                           className={`w-5 h-5 border-2 flex items-center justify-center mr-2 ${
@@ -144,9 +141,10 @@ const ElevatorConfigurator = () => {
                         </span>
                       </div>
                       {/* Front & Rear Opening Option */}
+                      {/* Front & Rear Opening Option */}
                       <div
                         onClick={() => handleOpeningOptionClick("frontRear")}
-                        className="flex items-center justify-center p-1 border-2 cursor-pointer transition-all bg-white border-gray-300 hover:border-gray-400 py-2"
+                        className="flex items-center p-1 border-2 cursor-pointer transition-all bg-white border-gray-300 hover:border-gray-400 text-black text-xs py-2"
                       >
                         <div
                           className={`w-5 h-5 border-2 flex items-center justify-center mr-2 ${
