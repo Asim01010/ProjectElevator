@@ -7,8 +7,9 @@ import HandrailController from "./Configuration/HandrailController";
 import CeilingController from "./Configuration/CeilingController";
 import Review from "./Configuration/Review";
 
-
 export default function ElevatorDesigner3() {
+  const [selectedView, setSelectedView] = useState(1);
+
   const [steps, setSteps] = useState([
     {
       label: "Configurations",
@@ -33,6 +34,37 @@ export default function ElevatorDesigner3() {
     { label: "Review", icon: "/ConfigurationNavbar/review.png", active: false },
   ]);
 
+  // Track active zone (which alphabet button is selected)
+  const [activeZone, setActiveZone] = useState("A");
+
+  // Track selected panels for ALL zones independently
+  const [selectedPanels, setSelectedPanels] = useState({
+    A: [],
+    B: [],
+    C: [],
+    D: [],
+    E: [],
+  });
+
+  // Toggle function that works for any zone
+  const togglePanel = (zone, num) => {
+    setSelectedPanels((prev) => {
+      const current = prev[zone] || [];
+      if (current.includes(num)) {
+        // Remove if already selected (toggle off)
+        return {
+          ...prev,
+          [zone]: current.filter((n) => n !== num),
+        };
+      }
+      // Add if not selected (toggle on)
+      return {
+        ...prev,
+        [zone]: [...current, num].sort((a, b) => a - b),
+      };
+    });
+  };
+
   const handleStepClick = (clickedIndex) => {
     setSteps(
       steps.map((step, index) => ({
@@ -41,20 +73,22 @@ export default function ElevatorDesigner3() {
       })),
     );
   };
+
   const activeStep = steps.find((step) => step.active)?.label;
 
+  const handleNextStep = () => {
+    const currentIndex = steps.findIndex((s) => s.active);
+    if (currentIndex < steps.length - 1) {
+      handleStepClick(currentIndex + 1);
+      setSelectedView(1);
+    }
+  };
+
   return (
-    /* 1. mt-16 (or whatever your main navbar height is) prevents overlap.
-       2. Responsive padding: 0 on mobile, large on desktop (xl:px-48).
-    */
     <div className="min-h-screen bg-gray-100 py-10 px-0 md:px-10 xl:px-48 mt-[64px]">
-      {/* This container handles the internal responsiveness. 
-          overflow-x-auto allows the user to swipe/scroll if the screen is too narrow.
-      */}
       <div className="w-full max-w-[1600px] mx-auto overflow-x-auto custom-scrollbar">
-        {/* Set a min-width to ensure the UI doesn't break/merge on mobile */}
-        <div className="min-w-[1100px] flex flex-col ">
-          {/* ===== Top Navigation (Step Bar) ===== */}
+        <div className="min-w-[1100px] flex flex-col">
+          {/* Navbar – original */}
           <nav className="w-full border border-gray-300 bg-gradient-to-b from-white to-gray-100 sticky top-0 z-20">
             <div className="flex items-stretch shadow-[inset_0_-15px_20px_rgba(0,0,0,0.10)]">
               {steps.map((step, index) => (
@@ -87,7 +121,6 @@ export default function ElevatorDesigner3() {
                     )}
                   </div>
 
-                  {/* Chevrons logic remains exactly as you had it */}
                   {step.active && index < steps.length - 1 && (
                     <div className="absolute right-7 top-0 bottom-0 flex items-center pointer-events-none">
                       {["#8CC63F", "#C1DE9B", "#D8E7C5"].map((color, i) => (
@@ -109,20 +142,34 @@ export default function ElevatorDesigner3() {
             </div>
           </nav>
 
-          {/* ===== Main Content ===== */}
+          {/* Main Content */}
           <div className="flex gap-4 min-h-[750px] items-stretch">
-            {/* Left Dynamic Panel: Control Panel */}
-            <div className="w-[420px] shrink-0  flex flex-col">
-              {activeStep === "Configurations" && <SelectModel />}
-              {activeStep === "Wall Panels" && <WallpanelController />}
+            <div className="w-[420px] shrink-0 flex flex-col">
+              {activeStep === "Configurations" && (
+                <SelectModel setSelectedView={setSelectedView} />
+              )}
+              {activeStep === "Wall Panels" && (
+                <WallpanelController
+                  activeZone={activeZone}
+                  setActiveZone={setActiveZone}
+                  selectedPanels={selectedPanels}
+                  togglePanel={togglePanel}
+                />
+              )}
               {activeStep === "Handrails" && <HandrailController />}
               {activeStep === "Ceilings" && <CeilingController />}
               {activeStep === "Review" && <Review />}
             </div>
 
-            {/* Right Constant Panel: Preview Stage */}
-            <div className="flex-grow   relative min-h-full">
-              <OpenModel />
+            <div className="flex-grow relative min-h-full">
+              <OpenModel
+                selectedView={selectedView}
+                setSelectedView={setSelectedView}
+                activeStep={activeStep}
+                onNext={handleNextStep}
+                activeZone={activeZone}
+                highlightedPanels={selectedPanels[activeZone] || []}
+              />
             </div>
           </div>
         </div>

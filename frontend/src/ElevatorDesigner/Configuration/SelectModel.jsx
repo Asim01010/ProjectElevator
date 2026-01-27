@@ -1,13 +1,19 @@
 import React, { useState } from "react";
 import { Check } from "lucide-react";
 
-const ElevatorConfigurator = () => {
+const ElevatorConfigurator = ({ setSelectedView }) => {
   const [activeTab, setActiveTab] = useState("LEVELe");
   const [selectedModel, setSelectedModel] = useState(null);
   const [openingOptions, setOpeningOptions] = useState({
     front: false,
     frontRear: false,
   });
+
+  const skeleton = [
+    { id: "view-1", image: "/SKELETON-001/view 1.JPG" },
+    { id: "view-2", image: "/SKELETON-001/view 2.JPG" },
+    { id: "view-3", image: "/SKELETON-001/view 3.JPG" },
+  ];
 
   // Data structure for all models
   const elevatorData = {
@@ -58,6 +64,17 @@ const ElevatorConfigurator = () => {
   const getRowForIndex = (index) => Math.floor(index / 3);
   const isLastInRow = (index) =>
     (index + 1) % 3 === 0 || index === currentModels.length - 1;
+
+  // Get the image to display based on opening option
+  const getDisplayImage = () => {
+    if (openingOptions.front) {
+      return skeleton[0].image; // view 1
+    } else if (openingOptions.frontRear) {
+      return skeleton[2].image; // view 3
+    } else {
+      return skeleton[0].image; // default view 1
+    }
+  };
 
   return (
     <div
@@ -175,29 +192,35 @@ const ElevatorConfigurator = () => {
                     <div className="flex justify-center items-center  bg-gray-100">
                       {/* Placeholder for elevator image */}
                       <div className="w-22   rounded-sm relative">
-                        <img src="/Sending/GAF-001/v2/GAF-001 v2.jpg" alt="" />
+                        <img src={skeleton[0].image} alt="" />
                       </div>
                     </div>
                   </div>
                 )}
-              </div>
+              </div>  
 
               {/* Show sub-image directly below the selected model's row */}
               {showSubImageAfterThis && (
-                <div className="col-span-3 flex justify-center p-2 bg-[#969696]">
-                  <div className="border bg-[#F1F3F2] border-[#8DC63F] w-auto">
+                <div className="col-span-3 gap-2 flex justify-center p-2 bg-[#969696]">
+                  <div className="border bg-[#F1F3F2] border-[#8DC63F] ">
                     <div className="text-center mb-1 text-xs font-semibold text-gray-700">
                       {selectedModel.name}
                     </div>
-                    <div className="flex justify-center items-center bg-gray-50">
-                      {/* Match size to original card */}
-                      <div className="relative" style={{ width: "100px" }}>
-                        <img
-                          src="/Sending/GAF-001/v2/GAF-001 v2.jpg"
-                          alt=""
-                          className="w-full h-auto object-contain px-2"
-                        />
-                      </div>
+                    <div className="flex justify-between items-center bg-transparent gap-2 p-2">
+                      {skeleton.map((view, index) => (
+                        <div
+                          key={view.id}
+                          className="relative cursor-pointer hover:opacity-80 transition-opacity"
+                          style={{ width: "120px" }}
+                          onClick={() => setSelectedView(index + 1)} // Sets view 1, 2, or 3
+                        >
+                          <img
+                            src={view.image}
+                            alt={view.id}
+                            className="w-full h-auto object-contain px-2"
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>

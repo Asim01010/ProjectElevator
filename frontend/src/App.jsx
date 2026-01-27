@@ -15,6 +15,8 @@ import ElevatorDesigner3 from "./ElevatorDesigner/ElevatorDesigner3";
 
 import OTP from "./Auth/OTP";
 
+import SimplePerspectiveGallery from "./SimplePerspectiveGallery";
+
 const App = () => {
   return (
     <Router>
@@ -32,6 +34,7 @@ const App = () => {
         <Route path="/elevator-designer2" element={<ElevatorDesigner2 />} />
         <Route path="/design/:id" element={<ElevatorDesigner3 />} />
         <Route path="/verify-otp" element={<OTP />} />
+        <Route path="/gsap" element={<SimplePerspectiveGallery/>} />
         {/* Add this route */}
       </Routes>
     </Router>
