@@ -4,10 +4,11 @@ import colors from "colors";
 import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
+import mongoose from "mongoose";
 
 import { connectDB } from "./config/configdb.js";
 import userRouter from "./routes/userRoute.js";
-import projectRouter from "./routes/projectRoute.js"; // ← Updated import name to match file
+import projectRouter from "./routes/projectRoute.js";
 
 dotenv.config();
 
@@ -17,12 +18,12 @@ const app = express();
    MIDDLEWARES
 ====================== */
 
-// Request logger (very helpful during development & debugging with Postman/Frontend)
+// Request logger
 if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev")); // logs: METHOD URL STATUS TIME
+  app.use(morgan("dev"));
 }
 
-// CORS configuration - allow frontend origin only
+// CORS configuration
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 app.use(
   cors({
@@ -32,7 +33,7 @@ app.use(
   }),
 );
 
-// Body parsers - increased limit in case you add file uploads later (images, etc.)
+// Body parsers
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
@@ -43,13 +44,10 @@ connectDB();
    ROUTES
 ====================== */
 
-// User authentication & profile routes
 app.use("/api/users", userRouter);
-
-// Project & subproject routes (this is where all project CRUD lives)
 app.use("/api/projects", projectRouter);
 
-// Health check endpoint (useful for monitoring, deployment, Postman)
+// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
@@ -64,7 +62,7 @@ app.get("/health", (req, res) => {
    ERROR HANDLING
 ====================== */
 
-// 404 - Route not found
+// 404 handler
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
@@ -80,21 +78,10 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({
     success: false,
     message: err.message || "Internal Server Error",
-    // Only show stack trace in development mode
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 });
 
-/* ======================
-   START SERVER
-====================== */
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(
-    colors.rainbow(
-      `Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`,
-    ),
-  );
-  console.log(colors.cyan(`Frontend allowed: ${FRONTEND_URL}`));
-});
+// ❌ REMOVE app.listen()
+// ✅ EXPORT app for Vercel
+export default app;
