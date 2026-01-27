@@ -1,14 +1,15 @@
 // src/redux/features/Register/registerService.js
-import axios from "axios";
+// import axios from "axios";
+import { API } from "../../api/axiosInstance"
+const API_URL = "/api/users/"; // relative to baseURL
 
-const API_URL = "http://localhost:5000/api/users/";
 
 // ─── AUTH SERVICES (unchanged) ───
 
 // REGISTER
 const regUserService = async (userData) => {
   try {
-    const response = await axios.post(`${API_URL}register`, userData);
+    const response = await API.post(`${API_URL}register`, userData);
 
     if (response.data) {
       localStorage.setItem("userInfo", JSON.stringify(response.data.user));
@@ -25,7 +26,7 @@ const regUserService = async (userData) => {
 // LOGIN USER
 export const loginUserService = async (loginData) => {
   try {
-    const response = await axios.post(`${API_URL}login`, loginData);
+    const response = await API.post(`${API_URL}login`, loginData);
 
     if (response.data) {
       localStorage.setItem("userInfo", JSON.stringify(response.data));
@@ -43,7 +44,7 @@ export const loginUserService = async (loginData) => {
 // VERIFY OTP
 export const verifyOTPService = async (otpData) => {
   try {
-    const response = await axios.post(`${API_URL}verify-otp/${otpData?.id}`, {
+    const response = await API.post(`${API_URL}verify-otp/${otpData?.id}`, {
       otp: otpData.otp,
     });
 
@@ -63,7 +64,7 @@ export const verifyOTPService = async (otpData) => {
 // RESEND OTP
 export const resendOTPService = async (email) => {
   try {
-    const response = await axios.post(`${API_URL}resend-otp`, { email });
+    const response = await API.post(`${API_URL}resend-otp`, { email });
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to resend OTP.");
@@ -77,7 +78,7 @@ export const getProfileService = async () => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const response = await axios.get(`${API_URL}profile`, {
+    const response = await API.get(`${API_URL}profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.data.user;
@@ -91,7 +92,7 @@ export const updateProfileService = async (profileData) => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const response = await axios.patch(`${API_URL}profile`, profileData, {
+    const response = await API.patch(`${API_URL}profile`, profileData, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -110,7 +111,7 @@ export const changePasswordService = async ({ oldPassword, newPassword }) => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No authentication token found");
 
-    const response = await axios.patch(
+    const response = await API.patch(
       `${API_URL}change-password`,
       { oldPassword, newPassword },
       {

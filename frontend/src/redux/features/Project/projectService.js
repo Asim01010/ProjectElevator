@@ -1,7 +1,9 @@
 // src/redux/features/Project/projectService.js
-import axios from "axios";
+import { API } from "../../api/axiosInstance"
 
-const API_URL = "http://localhost:5000/api/projects/"; // Adjust if your backend port differs
+const API_URL = "/api/projects/";
+
+ // Adjust if your backend port differs
 
 // Helper to get auth headers
 const getAuthHeaders = () => {
@@ -18,7 +20,7 @@ const getAuthHeaders = () => {
 // Create new project
 export const createProjectService = async (projectData) => {
   try {
-    const response = await axios.post(API_URL, projectData, getAuthHeaders());
+    const response = await API.post(API_URL, projectData, getAuthHeaders());
     return response.data.project;
   } catch (error) {
     throw new Error(
@@ -30,7 +32,7 @@ export const createProjectService = async (projectData) => {
 // Get all user projects (with optional search/sort)
 export const getUserProjectsService = async (params = {}) => {
   try {
-    const response = await axios.get(API_URL, {
+    const response = await API.get(API_URL, {
       ...getAuthHeaders(),
       params, // { search, sort }
     });
@@ -45,7 +47,7 @@ export const getUserProjectsService = async (params = {}) => {
 // Get single project by ID
 export const getProjectByIdService = async (id) => {
   try {
-    const response = await axios.get(`${API_URL}${id}`, getAuthHeaders());
+    const response = await API.get(`${API_URL}${id}`, getAuthHeaders());
     return response.data.project;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Failed to fetch project");
@@ -55,7 +57,7 @@ export const getProjectByIdService = async (id) => {
 // Update project
 export const updateProjectService = async (id, projectData) => {
   try {
-    const response = await axios.patch(
+    const response = await API.patch(
       `${API_URL}${id}`,
       projectData,
       getAuthHeaders(),
@@ -71,7 +73,7 @@ export const updateProjectService = async (id, projectData) => {
 // Delete project
 export const deleteProjectService = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}${id}`, getAuthHeaders());
+    const response = await API.delete(`${API_URL}${id}`, getAuthHeaders());
     return response.data; // { message }
   } catch (error) {
     throw new Error(
@@ -83,7 +85,7 @@ export const deleteProjectService = async (id) => {
 // Duplicate project
 export const duplicateProjectService = async (id, { newName }) => {
   try {
-    const response = await axios.post(
+    const response = await API.post(
       `${API_URL}${id}/duplicate`,
       { newName },
       getAuthHeaders(),
@@ -99,7 +101,7 @@ export const duplicateProjectService = async (id, { newName }) => {
 // Add new subproject
 export const addSubprojectService = async (projectId, subData = {}) => {
   try {
-    const response = await axios.post(
+    const response = await API.post(
       `${API_URL}${projectId}/subprojects`,
       subData,
       getAuthHeaders(),
@@ -115,7 +117,7 @@ export const addSubprojectService = async (projectId, subData = {}) => {
 // Update subproject
 export const updateSubprojectService = async (projectId, subId, subData) => {
   try {
-    const response = await axios.patch(
+    const response = await API.patch(
       `${API_URL}${projectId}/subprojects/${subId}`,
       subData,
       getAuthHeaders(),
@@ -131,7 +133,7 @@ export const updateSubprojectService = async (projectId, subId, subData) => {
 // Delete subproject
 export const deleteSubprojectService = async (projectId, subId) => {
   try {
-    const response = await axios.delete(
+    const response = await API.delete(
       `${API_URL}${projectId}/subprojects/${subId}`,
       getAuthHeaders(),
     );
@@ -150,7 +152,7 @@ export const duplicateSubprojectService = async (
   { newElevatorName },
 ) => {
   try {
-    const response = await axios.post(
+    const response = await API.post(
       `${API_URL}${projectId}/subprojects/${subId}/duplicate`,
       { newElevatorName },
       getAuthHeaders(),
@@ -165,7 +167,7 @@ export const duplicateSubprojectService = async (
 // Add to projectService.js first (if not already there)
 export const getSubprojectByIdService = async (subprojectId) => {
   try {
-    const response = await axios.get(
+    const response = await API.get(
       `${API_URL.replace("/projects/", "/subprojects/")}${subprojectId}`,
       getAuthHeaders(),
     );
