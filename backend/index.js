@@ -23,6 +23,8 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+import cors from "cors";
+
 const allowedOrigins = [
   process.env.FRONTEND_URL, // production frontend
   "http://localhost:5173", // local dev
@@ -31,19 +33,23 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like Postman)
+      // Allow requests with no origin (like Postman or curl)
       if (!origin) return callback(null, true);
 
+      // Allow frontend URLs
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed"));
+        return callback(null, true);
       }
+
+      // Instead of throwing, just block silently (optional)
+      return callback(null, false);
     },
-    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
+    preflightContinue: true, // Important for serverless
   }),
 );
+
 
 
 // Body parsers
