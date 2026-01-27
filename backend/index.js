@@ -1,4 +1,3 @@
-// backend/server.js (or index.js)
 import express from "express";
 import colors from "colors";
 import dotenv from "dotenv";
@@ -18,13 +17,12 @@ const app = express();
    MIDDLEWARES
 ====================== */
 
-// Request logger
+// Logger
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-import cors from "cors";
-
+// CORS
 const allowedOrigins = [
   process.env.FRONTEND_URL, // production frontend
   "http://localhost:5173", // local dev
@@ -33,30 +31,28 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like Postman or curl)
+      // Allow non-browser tools (Postman, curl)
       if (!origin) return callback(null, true);
 
-      // Allow frontend URLs
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      // Instead of throwing, just block silently (optional)
-      return callback(null, false);
+      return callback(new Error("CORS not allowed"), false);
     },
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
-    preflightContinue: true, // Important for serverless
   }),
 );
 
-
+// Explicit preflight support (VERY important for Vercel)
+app.options("*", cors());
 
 // Body parsers
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Connect to MongoDB
+// Connect DB
 connectDB();
 
 /* ======================
@@ -81,8 +77,8 @@ app.get("/health", (req, res) => {
    ERROR HANDLING
 ====================== */
 
-// 404 handler
-app.use((req, res, next) => {
+// 404
+app.use((req, res) => {
   res.status(404).json({
     success: false,
     message: `Route not found: ${req.method} ${req.originalUrl}`,
@@ -101,6 +97,5 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ❌ REMOVE app.listen()
-// ✅ EXPORT app for Vercel
+// Export for Vercel
 export default app;
