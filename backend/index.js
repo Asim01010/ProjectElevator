@@ -46,7 +46,7 @@ app.use(
 );
 
 // Explicit preflight support (VERY important for Vercel)
-app.options("*", cors());
+
 
 // Body parsers
 app.use(express.json({ limit: "10mb" }));
@@ -99,4 +99,3 @@ app.use((err, req, res, next) => {
 
 // Export for Vercel
 export default app;
-// dsfchjgvdsarglkjhsaglkjsahglkj
