@@ -203,6 +203,9 @@ const AssignedProjects = () => {
                     {project.priority}
                   </span>
                 </div>
+
+                {/* lorem 1000
+                 */}
                 <h3 className="font-semibold text-slate-900 mt-1.5 text-lg">{project.name}</h3>
                 <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
                   <span><i className="fas fa-building mr-1"></i>{project.client}</span>
