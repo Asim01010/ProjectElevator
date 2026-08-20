@@ -175,6 +175,11 @@ const howItWorksSteps = [
         </div>
 
         {/* 2. CENTER: Main Content (Number, Title, Desc) */}
+        {/* 2. CENTER: Main Content (Number, Title, Desc) */}
+        {/* 2. CENTER: Main Content (Number, Title, Desc) */}
+        {/* 2. CENTER: Main Content (Number, Title, Desc) */}
+        {/* 2. CENTER: Main Content (Number, Title, Desc) */}
+        {/* 2. CENTER: Main Content (Number, Title, Desc) */}
         <div className="flex flex-col items-center text-center flex-1 min-w-0">
           <div className="flex items-center justify-center gap-1.5 mb-1 w-full">
             <div className="w-3 h-3 rounded-full bg-[#8C623A] text-white p-1 flex items-center justify-center font-bold text-[10px] shrink-0">
