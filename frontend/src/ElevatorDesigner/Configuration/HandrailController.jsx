@@ -58,7 +58,7 @@ const HandrailController = ({ applyHandrail, applySubHandrail }) => {
     if (previewContainerRef.current) {
       if (previewUrl) {
         gsap.to(previewContainerRef.current, {
-          height: 220,
+          height: 300,
           duration: 0.5,
           ease: "power3.out"
         });

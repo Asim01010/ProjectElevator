@@ -94,38 +94,38 @@ const CabInspiration = () => {
   ];
 
   // ✅ Unique title + description per MEDS card instead of the same copy repeated six times
-  const meds = [
-    {
-      icon: <FaRegLightbulb className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-      title: "Real-Time Preview",
-      desc: "See every material swap update your cab instantly.",
-    },
-    {
-      icon: <FaDribbbleSquare className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-      title: "Designer-Led Palettes",
-      desc: "Curated combinations that always look cohesive.",
-    },
-    {
-      icon: <HiMiniPencilSquare className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-      title: "Editable Anytime",
-      desc: "Revisit and adjust your design before you order.",
-    },
-    {
-      icon: <RiVoiceRecognitionFill className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-      title: "Guided Support",
-      desc: "Our team reviews your concept before production.",
-    },
-    {
-      icon: <TbScreenShare className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-      title: "Shareable Designs",
-      desc: "Send a link so stakeholders can review and approve.",
-    },
-    {
-      icon: <PiBuildingOffice className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-      title: "Built for Any Building",
-      desc: "Concepts scale from single lobbies to full portfolios.",
-    },
-  ];
+  // const meds = [
+  //   {
+  //     icon: <FaRegLightbulb className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
+  //     title: "Real-Time Preview",
+  //     desc: "See every material swap update your cab instantly.",
+  //   },
+  //   {
+  //     icon: <FaDribbbleSquare className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
+  //     title: "Designer-Led Palettes",
+  //     desc: "Curated combinations that always look cohesive.",
+  //   },
+  //   {
+  //     icon: <HiMiniPencilSquare className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
+  //     title: "Editable Anytime",
+  //     desc: "Revisit and adjust your design before you order.",
+  //   },
+  //   {
+  //     icon: <RiVoiceRecognitionFill className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
+  //     title: "Guided Support",
+  //     desc: "Our team reviews your concept before production.",
+  //   },
+  //   {
+  //     icon: <TbScreenShare className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
+  //     title: "Shareable Designs",
+  //     desc: "Send a link so stakeholders can review and approve.",
+  //   },
+  //   {
+  //     icon: <PiBuildingOffice className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
+  //     title: "Built for Any Building",
+  //     desc: "Concepts scale from single lobbies to full portfolios.",
+  //   },
+  // ];
 
   // Category Filter Pills
   const categories = ["ALL STYLES", "INDUSTRIAL", "HEALTHCARE", "HOSPITALITY", "CORPORATE"];
@@ -138,6 +138,16 @@ const CabInspiration = () => {
     { id: 4, title: "Industrial Edge", desc: "Concrete textures with dark metal details.", image: "Cab Inspiration/4.png" },
     { id: 5, title: "Modern Bronze", desc: "Rich bronze tones that create a bold statement.", image: "Cab Inspiration/5.png" },
   ];
+
+// Get Inspired
+const getInspired = [
+  // { image: "howitworkssteps/getispired.png", title: "Step 1: Get Inspired", path: "/step1" },
+  { image: "getInspired/configuration.png", title: "Step 1: Models Selection" },
+  { image: "getInspired/wallpanel.png", title: "Step 2: Wall Panels" },
+  { image: "getInspired/handrail.png", title: "Step 4: Handrails and Bumpers" },
+  { image: "getInspired/ceiling_floor.png", title: "Step 3: Ceilings and Floors" },
+  { image: "getInspired/review.png", title: "Step 5: Review & Approve" },
+];
 
   // Stat Highlights
   const statHighlights = [
@@ -308,6 +318,24 @@ const CabInspiration = () => {
         ))}
       </div>
 
+         {/* ----------------- SECTION 5: Ruling images ----------------- */}
+          <div className="max-w-7xl mx-auto mt-10 mb-2 relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  {getInspired.map((step, idx) => (
+    <div key={idx} className="flex flex-col items-center">
+      <div className="w-full h-56 sm:h-64 rounded-xl overflow-hidden bg-[#F3ECE0]">
+        <img
+          src={step.image}
+          alt={step.title}
+          className="w-full h-full object-cover transition-opacity hover:opacity-90 cursor-pointer"
+        />
+      </div>
+      <p className="text-[20px] font-semibold text-[#2C2822] mt-2">
+        {step.title}
+      </p>
+    </div>
+  ))}
+</div>
+
       {/* SECTION Create a Custom Design */}
       <div className="w-full max-w-7xl mx-auto mb-4">
         <div className="bg-[#FAF8F5] rounded-2xl overflow-hidden">
@@ -374,7 +402,7 @@ const CabInspiration = () => {
       </div>
 
       {/* Section MEDS */}
-      <div className="max-w-7xl mx-auto mb-4">
+      {/* <div className="max-w-7xl mx-auto mb-4">
         <p className="uppercase  font-bold tracking-widest text-black mb-3 text-center">
           Why designs with MEDS?
         </p>
@@ -389,7 +417,7 @@ const CabInspiration = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Section Black */}
       <div className="w-full max-w-7xl mx-auto mb-4 bg-black rounded-2xl overflow-hidden">
