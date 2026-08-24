@@ -1,6 +1,6 @@
-import { useRef } from 'react';
-import { FaArrowRightLong, FaRegCirclePlay } from "react-icons/fa6";
-
+import { useRef, useState } from 'react';
+import { FaArrowRightLong, FaRegCirclePlay, FaXmark } from "react-icons/fa6";
+import { Link } from 'react-router-dom';
 
 export default function HeroContent() {
   const containerRef = useRef(null);
@@ -9,10 +9,30 @@ export default function HeroContent() {
   const primaryBtnRef = useRef(null);
   const secondaryBtnRef = useRef(null);
   const arrowSvgRef = useRef(null);
+  const videoRef = useRef(null);
 
-  // Button hover & click animations
- 
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
 
+  const openVideo = () => {
+    setIsVideoOpen(true);
+    // Small delay so the video element is in the DOM before we call play()
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0;
+        videoRef.current.play().catch(() => {
+          // Autoplay might be blocked by browser – user can still press play
+        });
+      }
+    }, 50);
+  };
+
+  const closeVideo = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+    setIsVideoOpen(false);
+  };
 
   return (
     <div
@@ -31,31 +51,33 @@ export default function HeroContent() {
       <div className="relative z-10 max-w-2xl">
         {/* Tag & Main Headline */}
         <div className="mb-4 sm:mb-6">
-          <span className="inline-block text-[11px] sm:text-xs md:text-sm f uppercase tracking-[0.18em] text-black mb-3  ">
-           The Elevator Design Platform
+          <span className="inline-block text-[11px] sm:text-xs md:text-sm uppercase tracking-[0.18em] text-black mb-3">
+            The Elevator Design Platform
           </span>
           <h1
             ref={headlineRef}
             className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-serif font-normal tracking-tight text-gray-900 leading-[1.15]"
           >
             Design Elevator Interiors That <br className="hidden sm:block" />
-            <span className="font-sans text-[#8B6D35] italic font-semibold">Inspire Every Ride</span>
+            <span className="font-sans text-[#8B6D35] italic font-semibold">
+              Inspire Every Ride
+            </span>
           </h1>
         </div>
 
         {/* Subtext Description */}
         <p
           ref={subtextRef}
-          className="text-gray-700 font-normal text-sm sm:text-base lg:text-lg leading-relaxed mb-6 sm:mb-8 max-w-sm "
+          className="text-gray-700 font-normal text-sm sm:text-base lg:text-lg leading-relaxed mb-6 sm:mb-8 max-w-sm"
         >
           Beautiful spaces begin with inspiration. No experience required.
         </p>
 
         {/* Action CTAs */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 mb-4">
+       <Link to="/login">
           <button
             ref={primaryBtnRef}
-        
             className="
               group
               relative
@@ -90,9 +112,10 @@ export default function HeroContent() {
               <FaArrowRightLong />
             </span>
           </button>
-
+</Link>
           <button
             ref={secondaryBtnRef}
+            onClick={openVideo}
             className="
               group
               inline-flex
@@ -127,6 +150,34 @@ export default function HeroContent() {
           </button>
         </div>
       </div>
+
+      {/* Video Overlay / Modal */}
+      {isVideoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          {/* Close button */}
+          <button
+            onClick={closeVideo}
+            className="absolute top-24 right-4 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/40"
+            aria-label="Close video"
+          >
+            <FaXmark className="text-xl" />
+          </button>
+
+          {/* Video player */}
+          <div className="relative w-full max-w-5xl aspect-video">
+            <video
+              ref={videoRef}
+              src="/ProjectVideo.mp4"
+              controls
+              playsInline
+              className="w-full h-full rounded-lg shadow-2xl bg-black"
+              // All native controls (play, pause, volume, timeline, fullscreen, settings) are available
+            >
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

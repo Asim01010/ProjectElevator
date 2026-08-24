@@ -51,7 +51,7 @@ console.log("User role after success:", user?.role || storedUser?.role);
         toast.success(userMessage || "Account verified successfully!");
 
         const redirectMap = {
-          user: "/",
+          user: "/profile",
           fabricator: "/dashboard_fabricator",
           supplier: "/supplier/dashboard",
         };

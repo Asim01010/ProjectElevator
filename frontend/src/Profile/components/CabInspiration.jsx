@@ -142,11 +142,12 @@ const CabInspiration = () => {
 // Get Inspired
 const getInspired = [
   // { image: "howitworkssteps/getispired.png", title: "Step 1: Get Inspired", path: "/step1" },
-  { image: "getInspired/configuration.png", title: "Step 1: Models Selection" },
-  { image: "getInspired/wallpanel.png", title: "Step 2: Wall Panels" },
+  { image: "getInspired/Profile.png", title: "Step 1: Create Project" },
+  { image: "getInspired/configuration.png", title: "Step 2: Models Selection" },
+  { image: "getInspired/wallpanel.png", title: "Step 3: Wall Panels" },
   { image: "getInspired/handrail.png", title: "Step 4: Handrails and Bumpers" },
-  { image: "getInspired/ceiling_floor.png", title: "Step 3: Ceilings and Floors" },
-  { image: "getInspired/review.png", title: "Step 5: Review & Approve" },
+  { image: "getInspired/ceiling_floor.png", title: "Step 5: Ceilings and Floors" },
+  { image: "getInspired/review.png", title: "Step 6: Review & Approve" },
 ];
 
   // Stat Highlights

@@ -36,7 +36,7 @@ const howItWorksSteps = [
   { image: "howitworkssteps/registerpage.png", title: "Step 1: Login/Register", path: "/step2" },
   { image: "howitworkssteps/profile-edit.png", title: "Step 2: Profile Update", path: "/step3" },
   { image: "howitworkssteps/project.png", title: "Step 3: Project Creation", path: "/step4" },
-  { image: "howitworkssteps/subproject.png", title: "Step 4: Go To Studio", path: "/step5" },
+  { image: "howitworkssteps/wallpanel.png", title: "Step 4: Go To Studio", path: "/step5" },
 ];
 
   const steps = [
