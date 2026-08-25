@@ -44,7 +44,7 @@ import CabInspiration from "./Profile/components/CabInspiration";
 import { ToastProvider } from "./context/ToastContext";
 // import Step1 from "./Profile/components/steps/Step1";
 // import Step6 from "./Profile/components/steps/Step6";
-// import Step5 from "./Profile/components/steps/Step5";
+import Step5 from "./Profile/components/steps/Step5";
 import Step4 from "./Profile/components/steps/Step4";
 import Step3 from "./Profile/components/steps/Step3";
 import Step2 from "./Profile/components/steps/Step2";
@@ -117,7 +117,7 @@ const AppContent = () => {
         <Route path="/step2" element={<Step2 />} />
         <Route path="/step3" element={<Step3 />} />
         <Route path="/step4" element={<Step4 />} />
-     {/* <Route path="/step5" element={<Step5 />} /> */}
+        <Route path="/step5" element={<Step5 />} />
         {/* <Route path="/step6" element={<Step6 />} />  */}
         <Route path="/cab-inspiration" element={<CabInspiration />} />
         <Route path="/project/:id" element={<ProjectDetail />} />

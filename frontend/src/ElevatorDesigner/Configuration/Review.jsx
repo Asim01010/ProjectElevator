@@ -299,7 +299,6 @@ const Review = ({
           background: linear-gradient(180deg, #423516 0%, #29200B 100%); /* Deep Satin Gold-Onyx */
           border-bottom: 1px solid #C9A245; /* Polished Golden Hairline Separator */
         }
-
         .review-header-title {
           font-family: 'Cormorant Garamond', serif;
           font-size: 20px;

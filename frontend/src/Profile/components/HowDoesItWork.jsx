@@ -32,11 +32,10 @@ const HowDoesItWork = () => {
 
 
 const howItWorksSteps = [
-  // { image: "howitworkssteps/getispired.png", title: "Step 1: Get Inspired", path: "/step1" },
-  { image: "howitworkssteps/registerpage.png", title: "Step 1: Login/Register", path: "/step2" },
-  { image: "howitworkssteps/profile-edit.png", title: "Step 2: Profile Update", path: "/step3" },
-  { image: "howitworkssteps/project.png", title: "Step 3: Project Creation", path: "/step4" },
-  { image: "howitworkssteps/wallpanel.png", title: "Step 4: Go To Studio", path: "/step5" },
+  { image: "/howitworkssteps/registerpage.png", title: "Step 1: Login/Register", path: "/step2" },
+  { image: "/howitworkssteps/profile-edit.png", title: "Step 2: Profile Update", path: "/step3" },
+  { image: "/howitworkssteps/project.png", title: "Step 3: Project Creation", path: "/step4" },
+  { image: "/howitworkssteps/wallpanel.png", title: "Step 4: Go To Studio", path: "/step5" },
 ];
 
   const steps = [
@@ -208,10 +207,10 @@ const howItWorksSteps = [
 
 
       {/* ----------------- SECTION 4: Ruling images ----------------- */}
-     <div className=" max-w-8xl mx-auto mt-10 mb-2 relative   grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4  gap-4">
+ <div className="max-w-8xl mx-auto mt-10 mb-2 relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
   {howItWorksSteps.map((step, idx) => (
     <div key={idx} className="flex flex-col items-center">
-      <Link to={step.path} className="w-full h-full block cursor-pointer">
+      <Link to={step.path.trim()} className="w-full h-full block cursor-pointer">
         <img
           src={step.image}
           alt={step.title}

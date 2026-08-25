@@ -102,17 +102,17 @@ console.log("EMAIL_PASS length:", process.env.EMAIL_PASS?.length);
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: `"ShopHub" <${process.env.EMAIL_USER}>`,
+      from: `"My Elevator Design Studio" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "🔐 Your ShopHub Verification Code",
+      subject: "🔐 My Elevator Design Studio Verification Code",
       html: `
         <div style="font-family: Arial, Helvetica, sans-serif; max-width: 520px; margin: 0 auto; padding: 30px; background: #f9fafb; border-radius: 12px;">
-          <h2 style="color: #4f46e5; text-align: center;">Verify Your Email</h2>
+          <h2 style="color: #8B6D35; text-align: center;">Verify Your Email</h2>
           <p style="font-size: 16px; color: #374151; text-align: center;">
-            Use the code below to verify your ShopHub account:
+            Use the code below to verify your My Elevator Design Studio account:
           </p>
 
-          <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; text-align: center; margin: 30px 0; color: #ffffff; background: linear-gradient(90deg, #4f46e5, #7c3aed); padding: 16px 24px; border-radius: 12px;">
+          <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; text-align: center; margin: 30px 0; color: #ffffff; background: linear-gradient(180deg, #C79A63 0%, #A67C52 50%, #7F5A34 100%); padding: 16px 24px; border-radius: 12px;">
             ${otp}
           </div>
 
@@ -125,7 +125,7 @@ console.log("EMAIL_PASS length:", process.env.EMAIL_PASS?.length);
           </p>
 
           <div style="text-align: center; margin-top: 32px; color: #9ca3af; font-size: 13px;">
-            © ${new Date().getFullYear()} ShopHub
+            © ${new Date().getFullYear()} My Elevator Design Studio. All rights reserved.
           </div>
         </div>
       `,
@@ -340,7 +340,7 @@ export const resendOTP = async (req, res) => {
 
     try {
       await transporter.sendMail({
-        from: `"ShopHub" <${process.env.EMAIL_USER}>`,
+        from: `"My Elevator Design Studio" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "🔐 New Verification Code",
         html: `Your new verification code is: <h2>${otp}</h2><p>Expires in 10 minutes.</p>`,
