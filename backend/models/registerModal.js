@@ -22,6 +22,22 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
 
+  // 🔥 Sub-role / category — only meaningful when role === "user"
+  subRole: {
+    type: String,
+    enum: [
+      "Elevator Contractor",
+      "Consultant",
+      "General Contractor",
+      "Architectural Firm",
+      "Building Owner",
+      "Property Manager",
+      "Designer",
+      "",
+    ],
+    default: "",
+  },
+
   // Profile Fields (Shared by all roles)
   firstName: { type: String, trim: true, default: "" },
   lastName: { type: String, trim: true, default: "" },

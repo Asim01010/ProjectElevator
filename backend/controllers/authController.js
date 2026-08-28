@@ -24,11 +24,11 @@ const createTransporter = () => {
 /**
  * STEP 1: Register + send OTP
  * POST /api/users/register
- * Body: { email, password, confirmPassword }
+ * Body: { email, password, confirmPassword, role, subRole }
  */
 export const registerUser = async (req, res) => {
   try {
-    const { email, password, confirmPassword, role = "user" } = req.body;
+    const { email, password, confirmPassword, role = "user", subRole = "" } = req.body;
 
     // 1. Validation
     if (!email || !password || !confirmPassword) {
@@ -57,6 +57,14 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Please enter a valid email address",
+      });
+    }
+
+    // Require a category when signing up as an End User
+    if (role === "user" && !subRole) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select your category",
       });
     }
 
@@ -90,6 +98,7 @@ export const registerUser = async (req, res) => {
       email,
       password: hashedPassword,
       role,
+      subRole: role === "user" ? subRole : "",
       otp,
       otpExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
       isVerified: false,
@@ -97,7 +106,7 @@ export const registerUser = async (req, res) => {
 
     // 6. Send OTP email — isolated try/catch so a mail failure
     console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS length:", process.env.EMAIL_PASS?.length);
+    console.log("EMAIL_PASS length:", process.env.EMAIL_PASS?.length);
     //    doesn't bubble up as a 500 and doesn't orphan the user record.
     const transporter = createTransporter();
 

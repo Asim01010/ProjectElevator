@@ -46,11 +46,11 @@ const labelStyle = {
 };
 // ── Small reusable components ──────────────────────────────────────────────────
 
-function SectionDot() {
+function SectionDot({ color }) {
   return (
     <span
       className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-      style={{ backgroundColor: "#A17C50" }}
+      style={{ backgroundColor: color || "#A17C50" }}
     />
   );
 }
@@ -90,34 +90,31 @@ function ActionLink({ icon, label, to, onClick }) {
   );
 }
 
-// ── Create Project Modal ───────────────────────────────────────────────────────
-function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
-  const modalRef   = useRef(null);
+// ── Shared modal shell (backdrop + entrance animation) ─────────────────────────
+function ModalShell({ isOpen, children, maxWidth = "max-w-md" }) {
+  const modalRef = useRef(null);
   const contentRef = useRef(null);
-  const [formData, setFormData] = useState({ name: "", company: "" });
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      gsap.fromTo(modalRef.current,
+      gsap.fromTo(
+        modalRef.current,
         { opacity: 0 },
         { opacity: 1, duration: 0.3, ease: "power2.out" }
       );
-      gsap.fromTo(contentRef.current,
+      gsap.fromTo(
+        contentRef.current,
         { scale: 0.94, y: 28, opacity: 0 },
         { scale: 1, y: 0, opacity: 1, duration: 0.45, ease: "back.out(0.7)" }
       );
     } else {
       document.body.style.overflow = "auto";
     }
-    return () => { document.body.style.overflow = "auto"; };
+    return () => {
+      document.body.style.overflow = "auto";
+    };
   }, [isOpen]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit(formData, e);
-    setFormData({ name: "", company: "" });
-  };
 
   if (!isOpen) return null;
 
@@ -127,91 +124,241 @@ function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
       className="fixed inset-0 z-50 flex items-center justify-center p-2"
       style={{ background: "rgba(44,40,34,0.62)", backdropFilter: "blur(8px)" }}
     >
-      <div ref={contentRef} className="relative w-full max-w-md" style={glassCard}>
-        {/* Header */}
-        <div
-          className="flex items-center justify-between p-2 border-b"
-          style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
-        >
-          <div className="flex items-center gap-2">
-            <SectionDot />
-            <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
-              Create New Project
-            </h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="transition-opacity hover:opacity-60"
-            style={{ color: "rgba(161,124,80,0.6)" }}
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-2 space-y-5">
-          <div>
-            <label style={labelStyle} className="block mb-1.5">Project Name *</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              style={inputStyle}
-              className="w-full px-3 py-2.5 text-sm"
-              placeholder="e.g. Residential Tower Lift"
-              onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
-              onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
-              required
-            />
-          </div>
-          <div>
-            <label style={labelStyle} className="block mb-1.5">Company Name *</label>
-            <input
-              type="text"
-              value={formData.company}
-              onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-              style={inputStyle}
-              className="w-full px-3 py-2.5 text-sm"
-              placeholder="e.g. ABC Elevators Pvt Ltd"
-              onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
-              onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
-              required
-            />
-          </div>
-
-          <div className="flex gap-3 pt-3">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg disabled:opacity-50 transition-all"
-              style={{
-                backgroundColor: "#A17C50",
-                boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
-              }}
-            >
-              {isLoading ? "Creating…" : "Create Project"}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
-              style={{
-                background: "rgba(161,124,80,0.08)",
-                color: "rgba(161,124,80,0.7)",
-                border: "1px solid rgba(161,124,80,0.2)",
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-
-        {/* decorative corner */}
-        <div className="absolute -top-3 -right-3 w-9 h-9 bg-white/80 rounded-full flex items-center justify-center shadow-lg opacity-80">
-          <span className="text-base">✦</span>
-        </div>
+      <div ref={contentRef} className={`relative w-full ${maxWidth}`} style={glassCard}>
+        {children}
       </div>
     </div>
+  );
+}
+
+// ── Create Project Modal ───────────────────────────────────────────────────────
+function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
+  const [formData, setFormData] = useState({ name: "", company: "" });
+
+  useEffect(() => {
+    if (isOpen) setFormData({ name: "", company: "" });
+  }, [isOpen]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData, e);
+  };
+
+  return (
+    <ModalShell isOpen={isOpen}>
+      {/* Header */}
+      <div
+        className="flex items-center justify-between p-2 border-b"
+        style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
+      >
+        <div className="flex items-center gap-2">
+          <SectionDot />
+          <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
+            Create New Project
+          </h3>
+        </div>
+        <button
+          onClick={onClose}
+          className="transition-opacity hover:opacity-60"
+          style={{ color: "rgba(161,124,80,0.6)" }}
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="p-2 space-y-5">
+        <div>
+          <label style={labelStyle} className="block mb-1.5">Project Name *</label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            style={inputStyle}
+            className="w-full px-3 py-2.5 text-sm"
+            placeholder="e.g. Residential Tower Lift"
+            onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
+            onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
+            required
+          />
+        </div>
+        <div>
+          <label style={labelStyle} className="block mb-1.5">Company Name *</label>
+          <input
+            type="text"
+            value={formData.company}
+            onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+            style={inputStyle}
+            className="w-full px-3 py-2.5 text-sm"
+            placeholder="e.g. ABC Elevators Pvt Ltd"
+            onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
+            onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
+            required
+          />
+        </div>
+
+        <div className="flex gap-3 pt-3">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg disabled:opacity-50 transition-all"
+            style={{
+              backgroundColor: "#A17C50",
+              boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+            }}
+          >
+            {isLoading ? "Creating…" : "Create Project"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
+            style={{
+              background: "rgba(161,124,80,0.08)",
+              color: "rgba(161,124,80,0.7)",
+              border: "1px solid rgba(161,124,80,0.2)",
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </ModalShell>
+  );
+}
+
+// ── Confirm Modal (replaces window.confirm — used for Delete) ─────────────────
+function ConfirmModal({ isOpen, title, message, confirmLabel = "Confirm", onConfirm, onCancel, danger = true }) {
+  return (
+    <ModalShell isOpen={isOpen}>
+      {/* Header */}
+      <div
+        className="flex items-center justify-between p-2 border-b"
+        style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
+      >
+        <div className="flex items-center gap-2">
+          <SectionDot color={danger ? "#B3452F" : "#A17C50"} />
+          <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
+            {title}
+          </h3>
+        </div>
+        <button
+          onClick={onCancel}
+          className="transition-opacity hover:opacity-60"
+          style={{ color: "rgba(161,124,80,0.6)" }}
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="p-2 pb-1">
+        <p className="text-xs leading-relaxed" style={{ color: "#7A705F" }}>
+          {message}
+        </p>
+      </div>
+
+      {/* Footer */}
+      <div className="flex gap-3 p-2 pt-3">
+        <button
+          onClick={onConfirm}
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg transition-all"
+          style={{
+            backgroundColor: danger ? "#B3452F" : "#A17C50",
+            boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+          }}
+        >
+          {confirmLabel}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
+          style={{
+            background: "rgba(161,124,80,0.08)",
+            color: "rgba(161,124,80,0.7)",
+            border: "1px solid rgba(161,124,80,0.2)",
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </ModalShell>
+  );
+}
+
+// ── Duplicate Modal (replaces window.prompt) ────────────────────────────────
+function DuplicateModal({ isOpen, initialName, onConfirm, onCancel }) {
+  const [name, setName] = useState(initialName || "");
+
+  useEffect(() => {
+    setName(initialName || "");
+  }, [initialName, isOpen]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (name.trim()) onConfirm(name.trim());
+  };
+
+  return (
+    <ModalShell isOpen={isOpen}>
+      <div
+        className="flex items-center justify-between p-2 border-b"
+        style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
+      >
+        <div className="flex items-center gap-2">
+          <SectionDot />
+          <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
+            Duplicate Project
+          </h3>
+        </div>
+        <button onClick={onCancel} className="transition-opacity hover:opacity-60" style={{ color: "rgba(161,124,80,0.6)" }}>
+          <X size={18} />
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="p-2 space-y-5">
+        <div>
+          <label style={labelStyle} className="block mb-1.5">New Project Name *</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={inputStyle}
+            className="w-full px-3 py-2.5 text-sm"
+            placeholder="e.g. Residential Tower Lift (Copy)"
+            autoFocus
+            required
+            onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
+            onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
+          />
+        </div>
+
+        <div className="flex gap-3 pt-1">
+          <button
+            type="submit"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg transition-all"
+            style={{
+              backgroundColor: "#A17C50",
+              boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+            }}
+          >
+            Duplicate
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
+            style={{
+              background: "rgba(161,124,80,0.08)",
+              color: "rgba(161,124,80,0.7)",
+              border: "1px solid rgba(161,124,80,0.2)",
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </ModalShell>
   );
 }
 
@@ -219,7 +366,7 @@ function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
 const Profile = () => {
   const dispatch  = useDispatch();
   const navigate  = useNavigate();
-const toast = useToast();
+  const toast = useToast();
 
   const containerRef = useRef(null);
   const headerRef    = useRef(null);
@@ -236,6 +383,10 @@ const toast = useToast();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchTerm, setSearchTerm]           = useState("");
   const [sortMode, setSortMode]               = useState("date");
+
+  // ── New: modal-driven state for delete/duplicate (replaces window.confirm/prompt) ──
+  const [deleteTarget, setDeleteTarget]       = useState(null); // projectId pending delete
+  const [duplicateTarget, setDuplicateTarget] = useState(null); // { id, name } pending duplicate
 
   // ── Fetch on mount ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -256,35 +407,35 @@ const toast = useToast();
   }, []);
 
   // ── Toast + reset + redirect ───────────────────────────────────────────────
-useEffect(() => {
-  if (projectSuccess) {
-    toast.success(projectMessage || "Operation successful");
+  useEffect(() => {
+    if (projectSuccess) {
+      toast.success(projectMessage || "Operation successful");
 
-    if (
-      projectMessage?.toLowerCase().includes("created") &&
-      lastCreatedSubprojectId
-    ) {
-      const subId = lastCreatedSubprojectId;
+      if (
+        projectMessage?.toLowerCase().includes("created") &&
+        lastCreatedSubprojectId
+      ) {
+        const subId = lastCreatedSubprojectId;
+        dispatch(projectReset());
+        navigate(`/design/${subId}`); // ✅ subproject id, NOT project id
+        return;
+      }
+
       dispatch(projectReset());
-      navigate(`/design/${subId}`); // ✅ subproject id, NOT project id
-      return;
     }
 
-    dispatch(projectReset());
-  }
-
-  if (projectError) {
-    toast.error(projectMessage || "Something went wrong");
-    dispatch(projectReset());
-  }
-}, [
-  projectSuccess,
-  projectError,
-  projectMessage,
-  lastCreatedSubprojectId,
-  navigate,
-  dispatch,
-]);
+    if (projectError) {
+      toast.error(projectMessage || "Something went wrong");
+      dispatch(projectReset());
+    }
+  }, [
+    projectSuccess,
+    projectError,
+    projectMessage,
+    lastCreatedSubprojectId,
+    navigate,
+    dispatch,
+  ]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleCreateProject = (formData, e) => {
@@ -296,18 +447,27 @@ useEffect(() => {
     setShowCreateModal(false);
   };
 
+  // Opens the confirm modal instead of window.confirm
   const handleDelete = (projectId) => {
-    if (window.confirm("Are you sure you want to delete this project? This will delete all its designs too.")) {
-      dispatch(deleteProject(projectId));
-    }
+    setDeleteTarget(projectId);
   };
 
+  const confirmDelete = () => {
+    if (deleteTarget) dispatch(deleteProject(deleteTarget));
+    setDeleteTarget(null);
+  };
+
+  // Opens the duplicate modal instead of window.prompt
   const handleDuplicate = (projectId) => {
     const found = projects.find((p) => p._id === projectId);
-    const newName = prompt("Enter new project name:", `${found?.name} (Copy)`);
-    if (newName && newName.trim()) {
-      dispatch(duplicateProject({ id: projectId, newName: newName.trim() }));
+    setDuplicateTarget({ id: projectId, name: `${found?.name || ""} (Copy)` });
+  };
+
+  const confirmDuplicate = (newName) => {
+    if (duplicateTarget) {
+      dispatch(duplicateProject({ id: duplicateTarget.id, newName }));
     }
+    setDuplicateTarget(null);
   };
 
   const handleEdit = (projectId) => {
@@ -338,6 +498,11 @@ useEffect(() => {
     color:      sortMode === mode ? "#fff"     : "rgba(161,124,80,0.7)",
     fontFamily: "inherit",
   });
+
+  // ── Derived label used inside the delete confirmation copy ─────────────────
+  const deleteTargetProject = deleteTarget
+    ? projects.find((p) => p._id === deleteTarget)
+    : null;
 
   return (
     <div
@@ -383,24 +548,14 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* ── Intro banner ── */}
-        {/* <div className="mb-2" style={glassCard}>
-          <div className="p-5">
-            <p className="text-xs leading-relaxed" style={{ color: "#7A705F" }}>
-              FAST-TRACK THE DESIGN PROCESS! my.EDS lets you create and manage Elevator Design Studio projects,
-              designs, and your profile information from one spot.
-            </p>
-          </div>
-        </div> */}
-
       <div className="w-full max-w-7xl mx-auto mb-2 " >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        
+
         {/* ── CARD 1: My Profile (Compact Luxury Badge Layout) ── */}
         <div className="lg:col-span-5 bg-white border border-[#E6E0D6] shadow-sm flex flex-col justify-between relative overflow-hidden group">
           {/* Subtle Accent Line */}
           <div className="h-1 w-full bg-gradient-to-r from-[#8C6239] to-[#A17C50]" />
-          
+
           <div className="p-2 sm:p-2 flex-1">
             <div className="flex items-center justify-between mb-2 pb-4 border-b border-[#F0EAE1]">
               <span className="text-xs font-bold uppercase tracking-widest text-[#8C6239]">
@@ -430,15 +585,15 @@ useEffect(() => {
                   My Profile
                 </h3>
                 <div className="flex flex-col gap-2 text-xs font-medium">
-                  <Link 
-                    to="/profile-edit" 
+                  <Link
+                    to="/profile-edit"
                     className="p-1.5 bg-[#FAF8F5] hover:bg-[#2C2822] text-[#2C2822] hover:text-white transition-all duration-200 border border-[#E6E0D6] flex items-center justify-between group/btn"
                   >
                     <span>Edit Security & Password</span>
                     <span className="text-[#8C6239] group-hover/btn:text-white transition-colors">→</span>
                   </Link>
-                  <Link 
-                    to="/profile-edit" 
+                  <Link
+                    to="/profile-edit"
                     className="p-1.5 bg-[#FAF8F5] hover:bg-[#2C2822] text-[#2C2822] hover:text-white transition-all duration-200 border border-[#E6E0D6] flex items-center justify-between group/btn"
                   >
                     <span>Contact Information</span>
@@ -452,7 +607,7 @@ useEffect(() => {
 
         {/* ── CARD 2: How Does It Work? (Hero Spotlight Banner Layout) ── */}
         <div className="lg:col-span-7 bg-[#2C2822] text-white flex flex-col justify-between relative overflow-hidden p-2 sm:p-2">
-          
+
           {/* Subtle Decorative Background Element */}
           <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-[#8C6239]/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -476,8 +631,8 @@ useEffect(() => {
               </p>
 
               {/* Preview Thumbnail */}
-              <Link 
-                to="/how-does-it-work" 
+              <Link
+                to="/how-does-it-work"
                 className="sm:col-span-4 group relative overflow-hidden block border border-white/20 hover:border-[#A17C50] transition-colors"
               >
                 <img
@@ -619,6 +774,25 @@ useEffect(() => {
         onClose={() => setShowCreateModal(false)}
         onSubmit={handleCreateProject}
         isLoading={projectLoading}
+      />
+
+      {/* ── Delete Confirm Modal (replaces window.confirm) ── */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete Project"
+        message={`Are you sure you want to delete "${deleteTargetProject?.name || "this project"}"? This will delete all its designs too. This action cannot be undone.`}
+        confirmLabel="Delete"
+        danger
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
+      {/* ── Duplicate Modal (replaces window.prompt) ── */}
+      <DuplicateModal
+        isOpen={!!duplicateTarget}
+        initialName={duplicateTarget?.name}
+        onConfirm={confirmDuplicate}
+        onCancel={() => setDuplicateTarget(null)}
       />
     </div>
   );

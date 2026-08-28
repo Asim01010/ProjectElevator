@@ -54,7 +54,12 @@ const OpenModel = forwardRef(
         return () => clearTimeout(timer);
       }
     }, [selectedModelId, selectedView]);
-
+// add this near your other useEffects in OpenModel.jsx
+useEffect(() => {
+  if (selectedModelId && (appliedDoor === null || appliedDoor === undefined)) {
+    setAppliedDoor?.(2);
+  }
+}, [selectedModelId]);
     // GSAP Entrances for Top Bar UI elements
     useEffect(() => {
       if (topBarRef.current) {
