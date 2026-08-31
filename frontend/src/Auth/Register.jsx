@@ -32,7 +32,7 @@
   const roleOptions = [
     {
       value: "user",
-      label: "End User",
+      label: "Meds Creator",
       desc: "Design & visualize your project",
       icon: (
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
@@ -46,14 +46,14 @@
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21" />
       ),
     },
-    {
-      value: "supplier",
-      label: "Supplier",
-      desc: "Supply & deliver materials",
-      icon: (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25h-5.25l-2.25 4.5m7.5-4.5v4.5m-7.5 0h7.5m-7.5 0l-2.25 4.5m2.25-4.5v4.5m0 0h4.5" />
-      ),
-    },
+    // {
+    //   value: "supplier",
+    //   label: "Supplier",
+    //   desc: "Supply & deliver materials",
+    //   icon: (
+    //     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25h-5.25l-2.25 4.5m7.5-4.5v4.5m-7.5 0h7.5m-7.5 0l-2.25 4.5m2.25-4.5v4.5m0 0h4.5" />
+    //   ),
+    // },
   ];
 
   // --- Dedicated Category Dropdown Component ---
@@ -346,7 +346,7 @@
             </div>
 
             {/* Patent Badge */}
-            <div className="mb-1">
+            {/* <div className="mb-1">
               <div
                 ref={badgeRef}
                 className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.14em]"
@@ -359,7 +359,7 @@
               >
                 <IoShieldCheckmark size={16} /> Patent-Pending Technology
               </div>
-            </div>
+            </div> */}
 
             {/* Heading Header */}
             <h1

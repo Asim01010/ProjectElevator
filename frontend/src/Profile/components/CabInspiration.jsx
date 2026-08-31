@@ -140,15 +140,15 @@ const CabInspiration = () => {
   ];
 
 // Get Inspired
-const getInspired = [
-  // { image: "howitworkssteps/getispired.png", title: "Step 1: Get Inspired", path: "/step1" },
-  { image: "getInspired/Profile.png", title: "Step 1: Create Project" },
-  { image: "getInspired/configuration.png", title: "Step 2: Models Selection" },
-  { image: "getInspired/wallpanel.png", title: "Step 3: Wall Panels" },
-  { image: "getInspired/handrail.png", title: "Step 4: Handrails and Bumpers" },
-  { image: "getInspired/ceiling_floor.png", title: "Step 5: Ceilings and Floors" },
-  { image: "getInspired/review.png", title: "Step 6: Review & Approve" },
-];
+// const getInspired = [
+//   // { image: "howitworkssteps/getispired.png", title: "Step 1: Get Inspired", path: "/step1" },
+//   { image: "getInspired/Profile.png", title: "Step 1: Create Project" },
+//   { image: "getInspired/configuration.png", title: "Step 2: Models Selection" },
+//   { image: "getInspired/wallpanel.png", title: "Step 3: Wall Panels" },
+//   { image: "getInspired/handrail.png", title: "Step 4: Handrails and Bumpers" },
+//   { image: "getInspired/ceiling_floor.png", title: "Step 5: Ceilings and Floors" },
+//   { image: "getInspired/review.png", title: "Step 6: Review & Approve" },
+// ];
 
   // Stat Highlights
   const statHighlights = [
@@ -320,7 +320,7 @@ const getInspired = [
       </div>
 
          {/* ----------------- SECTION 5: Ruling images ----------------- */}
-          <div className="max-w-7xl mx-auto mt-10 mb-2 relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* <div className="max-w-7xl mx-auto mt-10 mb-2 relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
   {getInspired.map((step, idx) => (
     <div key={idx} className="flex flex-col items-center">
       <div className="w-full h-56 sm:h-64 rounded-xl overflow-hidden bg-[#F3ECE0]">
@@ -335,7 +335,7 @@ const getInspired = [
       </p>
     </div>
   ))}
-</div>
+</div> */}
 
       {/* SECTION Create a Custom Design */}
       <div className="w-full max-w-7xl mx-auto mb-4">

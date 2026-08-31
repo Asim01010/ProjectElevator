@@ -193,7 +193,7 @@ const Login = () => {
               {/* Patent Badge */}
            
             </div>
-   <div
+   {/* <div
                 ref={badgeRef}
                 className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.15em]"
                 style={{
@@ -212,7 +212,7 @@ const Login = () => {
                 />
                 Patent-Pending technology
                 <style>{`@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.65)}}`}</style>
-              </div>
+              </div> */}
             {/* Heading */}
             <h1
               ref={headingRef}

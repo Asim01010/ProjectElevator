@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { toast } from "react-hot-toast";
+
 import { gsap } from "gsap";
 
 import {
@@ -12,9 +12,28 @@ import {
   duplicateProject,
   deleteProject,
 } from "../redux/features/Project/projectSlice";
-import { FilePenLine, PlusCircle, Search, X } from "lucide-react";
+import {
+  FilePenLine,
+  PlusCircle,
+  Search,
+  X,
+  Lightbulb,
+  Box,
+  HelpCircle,
+  ArrowRight,
+  Lock,
+  Mail,
+  ChevronRight,
+  Layers,
+  Eye,
+  ClipboardCheck,
+  Copy,
+  Trash2,
+  User,
+} from "lucide-react";
 import ProjectsGrid from "./components/ProjectsGrid";
 import { useToast } from "../context/useToast";
+import { RiUser3Line } from "react-icons/ri";
 // ── Shared style tokens ────────────────────────────────────────────────────────
 const glassCard = {
   background: "rgba(255,255,255,0.55)",
@@ -44,6 +63,27 @@ const labelStyle = {
   textTransform: "uppercase",
   color: "rgba(161,124,80,0.75)",
 };
+
+// ── Time-ago helper (used on project cards) ─────────────────────────────────
+function timeAgo(dateInput) {
+  if (!dateInput) return "recently";
+  const date = new Date(dateInput);
+  if (Number.isNaN(date.getTime())) return "recently";
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  const units = [
+    ["y", 31536000],
+    ["mo", 2592000],
+    ["d", 86400],
+    ["h", 3600],
+    ["m", 60],
+  ];
+  for (const [label, secs] of units) {
+    const val = Math.floor(seconds / secs);
+    if (val >= 1) return `${val}${label} ago`;
+  }
+  return "just now";
+}
+
 // ── Small reusable components ──────────────────────────────────────────────────
 
 function SectionDot({ color }) {
@@ -72,7 +112,7 @@ function SectionHeader({ title }) {
   );
 }
 
-function ActionLink({ icon, label, to, onClick }) {
+function ActionLink({  label, to, onClick }) {
   const ref = useRef(null);
   return (
     <Link
@@ -362,6 +402,90 @@ function DuplicateModal({ isOpen, initialName, onConfirm, onCancel }) {
   );
 }
 
+// ── Quick-action tile (top row of the main column) ──────────────────────────
+function QuickActionTile({ icon: Icon, title, subtitle, onClick }) {
+  const ref = useRef(null);
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      onMouseEnter={() => gsap.to(ref.current, { y: -3, duration: 0.2 })}
+      onMouseLeave={() => gsap.to(ref.current, { y: 0, duration: 0.2 })}
+      className="flex items-center gap-3 text-left rounded-lg bg-[flex items-center gap-3 text-left bg-white border border-[#E6E0D6] p-2 sm:p-3 w-full transition-shadow hover:shadow-md] border border-[#E6E0D6] p-2 sm:p-3 w-full transition-shadow hover:shadow-md"
+      style={{ fontFamily: "inherit" }}
+    >
+      <span
+        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+        style={{ color: "#A17C50" }}
+      >
+        <Icon size={25} />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-xs font-bold" style={{ color: "#2C2822" }}>{title}</span>
+        <span className="block text-[10px] truncate" style={{ color: "#9A8F7C" }}>{subtitle}</span>
+      </span>
+    </button>
+  );
+}
+
+// ── Single project card (matches the reference image's card layout) ─────────
+function ProjectCard({ project, onOpen, onEdit, onDuplicate, onDelete }) {
+  return (
+    <div className="bg-white border border-[#E6E0D6] overflow-hidden flex flex-col transition-shadow hover:shadow-md">
+      <div
+        onClick={onOpen}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && onOpen()}
+        className="relative h-24 cursor-pointer overflow-hidden flex items-center justify-center"
+        style={{ background: "linear-gradient(135deg, #2C2822, #4A4032)" }}
+      >
+        <Box size={26} className="text-white/25" />
+        <span className="absolute top-2 left-2 w-2 h-2 rounded-full" style={{ background: "#A17C50" }} />
+      </div>
+
+      <div className="p-2.5 flex flex-col gap-0.5 flex-1">
+        <h4
+          onClick={onOpen}
+          className="text-xs font-bold cursor-pointer truncate"
+          style={{ color: "#2C2822" }}
+        >
+          {project.name}
+        </h4>
+        <p className="text-[10px] truncate" style={{ color: "#9A8F7C" }}>{project.company}</p>
+        <p className="text-[9px] mb-1" style={{ color: "#B8AD98" }}>Modified {timeAgo(project.createdAt)}</p>
+
+        <div className="flex items-center gap-3 mt-auto pt-2 border-t" style={{ borderColor: "#F0EAE1" }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            title="Edit"
+            className="transition-colors"
+            style={{ color: "#9A8F7C" }}
+          >
+            <FilePenLine size={13} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+            title="Duplicate"
+            className="transition-colors"
+            style={{ color: "#9A8F7C" }}
+          >
+            <Copy size={13} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            title="Delete"
+            className="transition-colors ml-auto"
+            style={{ color: "#9A8F7C" }}
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Profile Component ─────────────────────────────────────────────────────
 const Profile = () => {
   const dispatch  = useDispatch();
@@ -499,10 +623,41 @@ const Profile = () => {
     fontFamily: "inherit",
   });
 
-  // ── Derived label used inside the delete confirmation copy ─────────────────
-  const deleteTargetProject = deleteTarget
-    ? projects.find((p) => p._id === deleteTarget)
-    : null;
+  // ── Quick-action tiles (top of the main 8-col area) ─────────────────────────
+  const quickActions = [
+    {
+      icon: Lightbulb,
+      title: "Get Inspired",
+      subtitle: "Explore ideas & designs",
+      onClick: () => toast.info("Get Inspired — coming soon"),
+    },
+    {
+      icon: PlusCircle,
+      title: "Start New Project",
+      subtitle: "Create a new design",
+      onClick: () => setShowCreateModal(true), // same action as the Create New Project card
+    },
+    {
+      icon: Box,
+      title: "Sample Box",
+      subtitle: "Order material samples",
+      onClick: () => toast.info("Sample Box — coming soon"),
+    },
+    {
+      icon: HelpCircle,
+      title: "Help Center",
+      subtitle: "Guides & support",
+      onClick: () => toast.info("Help Center — coming soon"),
+    },
+  ];
+
+  // ── The 4 steps shown in the hero banner ─────────────────────────────────────
+  const guideSteps = [
+    { icon: Box, title: "Choose Configuration", description: "Select your base elevator layout" },
+    { icon: Layers, title: "Customize Details", description: "Pick materials, panels, handrails & more" },
+    { icon: Eye, title: "Review in 3D", description: "See your design in realistic 3D" },
+    { icon: ClipboardCheck, title: "Save & Share", description: "Download, share or request a quote" },
+  ];
 
   return (
     <div
@@ -513,7 +668,8 @@ const Profile = () => {
         fontFamily: "'DM Sans', sans-serif",
         opacity: 0,
         paddingTop: "40px",    /* clear fixed navbar */
-        paddingBottom: "52px", /* clear fixed footer */
+        paddingBottom: "52px",
+         /* clear fixed footer */
       }}
     >
       <style>{`
@@ -530,14 +686,14 @@ const Profile = () => {
         {/* ── Page header ── */}
         <div ref={headerRef} className="mb-2">
           {/* Breadcrumb */}
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] flex items-center gap-2 mb-2"
+          {/* <p className="text-[10px] font-bold uppercase tracking-[0.18em] flex items-center gap-2 mb-2"
             style={{ color: "rgba(161,124,80,0.55)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity" style={{ color: "inherit" }}>Home</Link>
             <span style={{ color: "rgba(161,124,80,0.3)" }}>›</span>
             <span style={{ color: "#A17C50" }}>My Profile</span>
-          </p>
+          </p> */}
 
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <div className="w-1 h-10 rounded-full flex-shrink-0" style={{ background: "#A17C50" }} />
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400, fontSize: "clamp(22px, 4vw, 34px)", color: "#2C2822", lineHeight: 1.2 }}>
               My Profile
@@ -545,170 +701,258 @@ const Profile = () => {
                 | Elevator Design Studio
               </span>
             </h1>
-          </div>
+          </div> */}
         </div>
 
-      <div className="w-full max-w-7xl mx-auto mb-2 " >
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        {/* ── Main layout: sidebar (4 cols) + everything else (8 cols) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 ">
 
-        {/* ── CARD 1: My Profile (Compact Luxury Badge Layout) ── */}
-        <div className="lg:col-span-5 bg-white border border-[#E6E0D6] shadow-sm flex flex-col justify-between relative overflow-hidden group">
-          {/* Subtle Accent Line */}
-          <div className="h-1 w-full bg-gradient-to-r from-[#8C6239] to-[#A17C50]" />
+          {/* ══════════════════ Sidebar — 4 cols ══════════════════ */}
+          <div className="lg:col-span-4 flex flex-col gap-3">
 
-          <div className="p-2 sm:p-2 flex-1">
-            <div className="flex items-center justify-between mb-2 pb-4 border-b border-[#F0EAE1]">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#8C6239]">
-                Account Overview
-              </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 bg-[#FAF8F5] text-[#7A705F] border border-[#E6E0D6]">
-                Active
-              </span>
-            </div>
+            {/* My Account — dark card, matches the reference image */}
+            <div className="bg-[#1B1B1B] text-white p-2 sm:p-2 relative overflow-hidden flex flex-col flex-1 rounded-lg border border-white/10">
+              {/* <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.14) 0%, transparent 70%)" }} /> */}
 
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-              {/* Avatar Frame with Gold Accent */}
-              <div className="relative shrink-0">
-                <img
-                  src="/123.jpg"
-                  alt="Profile"
-                  className="w-28 h-28 object-cover shadow-sm border border-[#E6E0D6]"
-                />
-                <div className="absolute -bottom-2 -right-2 bg-[#2C2822] text-white text-[9px] uppercase tracking-wider font-semibold px-2 py-0.5">
-                  User
-                </div>
-              </div>
-
-              {/* Action Links Container */}
-              <div className="w-full space-y-3">
-                <h3 className="text-lg font-medium text-[#2C2822] font-serif mb-1">
-                  My Profile
-                </h3>
-                <div className="flex flex-col gap-2 text-xs font-medium">
-                  <Link
-                    to="/profile-edit"
-                    className="p-1.5 bg-[#FAF8F5] hover:bg-[#2C2822] text-[#2C2822] hover:text-white transition-all duration-200 border border-[#E6E0D6] flex items-center justify-between group/btn"
-                  >
-                    <span>Edit Security & Password</span>
-                    <span className="text-[#8C6239] group-hover/btn:text-white transition-colors">→</span>
-                  </Link>
-                  <Link
-                    to="/profile-edit"
-                    className="p-1.5 bg-[#FAF8F5] hover:bg-[#2C2822] text-[#2C2822] hover:text-white transition-all duration-200 border border-[#E6E0D6] flex items-center justify-between group/btn"
-                  >
-                    <span>Contact Information</span>
-                    <span className="text-[#8C6239] group-hover/btn:text-white transition-colors">→</span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── CARD 2: How Does It Work? (Hero Spotlight Banner Layout) ── */}
-        <div className="lg:col-span-7 bg-[#2C2822] text-white flex flex-col justify-between relative overflow-hidden p-2 sm:p-2">
-
-          {/* Subtle Decorative Background Element */}
-          <div className="absolute -right-12 -bottom-12 w-64 h-64 bg-[#8C6239]/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="py-2 px-4 flex-1">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#A17C50]">
-                Quickstart Guide
-              </span>
-              <span className="text-[10px] text-white/60 tracking-wider uppercase border border-white/10 px-2 py-0.5">
-                10 Steps Tutorial
-              </span>
-            </div>
-
-            <h2 className="text-2xl sm:text-3xl font-medium font-serif text-white mb-2">
-              How Does It Work?
-            </h2>
-
-            <div className="grid grid-cols-1 sm:grid-cols-12 gap-6 items-center">
-              <p className="sm:col-span-8 text-xs leading-relaxed text-white/70">
-                Getting started with the Elevator Design Studio (EDS) is simple. Learn how to select your configuration, apply materials and finishes, view realistic 3D renderings, and manage your project from a single location.
-              </p>
-
-              {/* Preview Thumbnail */}
-              <Link
-                to="/how-does-it-work"
-                className="sm:col-span-4 group relative overflow-hidden block border border-white/20 hover:border-[#A17C50] transition-colors"
-              >
-                <img
-                  src="/123456.jpg"
-                  alt="Tutorial preview"
-                  className="w-full h-24 object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-black/30 group-hover:bg-transparent transition-colors flex items-center justify-center">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white bg-[#8C6239] px-2 py-1 shadow-md">
-                    Watch
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-center justify-between mb-2 pb-3 border-b border-white/10">
+                  <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/90">
+                    <User color="#A17C50" />
+                    My Account
+                  </span>
+                  <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-1 bg-white/5 text-white/70 border border-white/15">
+                    Active
                   </span>
                 </div>
-              </Link>
-            </div>
-          </div>
 
-          {/* Bottom Action Footer */}
-          <div className="pt-2 px-4 mt-2 border-t border-white/10 flex items-center justify-between">
-            <span className="text-[11px] text-white/50">
-              Master the EDS platform in minutes
-            </span>
-            <Link
-              to="/how-does-it-work"
-              className="text-xs font-bold uppercase tracking-widest text-[#A17C50] hover:text-white transition-colors flex items-center gap-2 group"
-            >
-              <span>Launch Tutorial</span>
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
-            </Link>
-          </div>
-
-        </div>
-
-      </div>
-    </div>
-
-        {/* ── Row 2: Create New Project + My Projects ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-
-          {/* Create New Project */}
-          <div>
-            <div style={glassCard}>
-              <SectionHeader title="Create New Project" />
-              <div
-                className="p-6 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all hover:scale-[1.02]"
-                onClick={() => setShowCreateModal(true)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && setShowCreateModal(true)}
-              >
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center"
-                  style={{ background: "rgba(161,124,80,0.1)" }}
-                >
-                  <PlusCircle size={38} style={{ color: "#A17C50" }} />
+                <div className="flex items-start gap-3 mb-3">
+                  <img
+                    src="/123.jpg"
+                    alt="Profile"
+                    className="w-46 h-46 object-cover rounded-lg border border-white/15 flex-shrink-0"
+                  />
+                  <div className="flex flex-col gap-0.5 text-center" >
+                    <h3 className="text-2xl font-medium text-white/70" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Welcome back, 
+                    </h3>
+                    <p className="text-3xl text-white/70">Jhon !</p>  
+                    <p className="text-[13px] text-white/70">Let's create something extraordinary.</p>
+                  </div>
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#A17C50" }}>
-                  Start New Project
-                </p>
-                <p className="text-[9px] text-center" style={{ color: "rgba(161,124,80,0.5)" }}>
-                  Click to create a new elevator interior project
-                </p>
+
+                <div className="flex flex-col gap-1.5 mb-3">
+
+                    <Link
+                    to="/profile-edit"
+                    className="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row"
+                  >
+                    <span
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}
+                    >
+                      <RiUser3Line size={14} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-xs font-semibold">Edit Profile</span>
+                      <span className="block text-[10px] text-white/45">Manage your personal information</span>
+                    </span>
+                    <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
+                  </Link>
+                  <Link
+                    to="/profile-edit"
+                    className="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row"
+                  >
+                    <span
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}
+                    >
+                      <Lock size={14} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-xs font-semibold">Security &amp; Password</span>
+                      <span className="block text-[10px] text-white/45">Update your login credentials</span>
+                    </span>
+                    <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
+                  </Link>
+
+                  <Link
+                    to="/profile-edit"
+                    className="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row"
+                  >
+                    <span
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}
+                    >
+                      <Mail size={14} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-xs font-semibold">Contact Information</span>
+                      <span className="block text-[10px] text-white/45">Update your contact details</span>
+                    </span>
+                    <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
+                  </Link>
+                
+                </div>
+
+                <Link
+                  to="/profile-edit"
+                  className="mt-auto inline-flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-widest border border-white/20 text-white hover:bg-white/10 transition-colors"
+                >
+                  View Account Details
+                  <ArrowRight size={13} />
+                </Link>
               </div>
             </div>
+
+            {/* Create New Project — sits below My Account, same column */}
+            <div
+              className="bg-white border border-[#E6E0D6] p-2 sm:p-2 flex flex-col items-center justify-center gap-4 text-center cursor-pointer transition-transform hover:scale-[1.01] rounded-lg"
+              onClick={() => setShowCreateModal(true)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && setShowCreateModal(true)}
+            >
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center border-2 border-dashed"
+                style={{ borderColor: "rgba(161,124,80,0.4)" }}
+              >
+                <PlusCircle size={30} style={{ color: "#A17C50" }} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#2C2822" }}>
+                  Start a New Project
+                </p>
+                <p className="text-[11px] leading-relaxed" style={{ color: "#9A8F7C" }}>
+                  Click to create a new elevator interior design from scratch
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setShowCreateModal(true); }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg transition-all"
+                style={{
+                  backgroundColor: "#A17C50",
+                  boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+                }}
+              >
+                Create New Project
+                <ArrowRight size={13} />
+              </button>
+            </div>
           </div>
 
-          {/* My Projects */}
-          <div className="lg:col-span-2">
-            <div style={glassCard}>
-              <div className="p-4 border-b" style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <SectionDot />
-                  <h2 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>My Projects</h2>
+          {/* ══════════════════ Main content — 8 cols ══════════════════ */}
+          <div className="lg:col-span-8 flex flex-col gap-3">
+
+            {/* Quick-action tiles */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {quickActions.map((action) => (
+                <QuickActionTile key={action.title} {...action} />
+              ))}
+            </div>
+
+            {/* Hero — Quick Start Guide, matches the reference image */}
+            <div className="relative overflow-hidden p-2 sm:p-2" style={{ background: "#EFE6D6" }}>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <div className="lg:col-span-7 flex flex-col justify-center">
+                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#A17C50" }}>
+                    Quickstart Guide
+                  </span>
+                  <h2
+                    className="text-xl sm:text-2xl font-medium mt-1 mb-1"
+                    style={{ fontFamily: "'Playfair Display', serif", color: "#2C2822" }}
+                  >
+                    Design Your Elevator in 4 Easy Steps
+                  </h2>
+                  <p className="text-[11px] leading-relaxed mb-4" style={{ color: "#7A705F" }}>
+                    From concept to completion—bring your vision to life.
+                  </p>
+
+                  <div className="flex items-start">
+                    {guideSteps.map((step, i) => (
+                      <React.Fragment key={step.title}>
+                        <div className="flex flex-col items-center text-center w-1/4 px-1">
+                          <div className="relative mb-2">
+                            <div
+                              className="w-11 h-11 rounded-full flex items-center justify-center"
+                              style={{ background: "#fff", border: "1px solid rgba(161,124,80,0.3)", color: "#A17C50" }}
+                            >
+                              <step.icon size={17} />
+                            </div>
+                            <span
+                              className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
+                              style={{ background: "#A17C50" }}
+                            >
+                              {i + 1}
+                            </span>
+                          </div>
+                          <p className="text-[9px] font-bold uppercase tracking-wide mb-0.5" style={{ color: "#2C2822" }}>
+                            {step.title}
+                          </p>
+                          <p className="text-[9px] leading-snug" style={{ color: "#9A8F7C" }}>
+                            {step.description}
+                          </p>
+                        </div>
+                        {i < guideSteps.length - 1 && (
+                          <div
+                            className="flex-1 mt-5 border-t-2 border-dashed"
+                            style={{ borderColor: "rgba(161,124,80,0.3)" }}
+                          />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+
+                <div
+                  onClick={() => navigate("/how-does-it-work")}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === "Enter" && navigate("/how-does-it-work")}
+                  className="lg:col-span-5 relative overflow-hidden cursor-pointer group min-h-[160px]"
+                >
+                  <img
+                    src="/123456.jpg"
+                    alt="Tutorial preview"
+                    className="w-full h-full min-h-[160px] object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                  <span
+                    className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-md"
+                    style={{ background: "#2C2822" }}
+                  >
+                    Watch 10 Steps Tutorial
+                    <ArrowRight size={12} />
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* My Projects — search, sort, and cards matching the reference image */}
+            <div className="bg-white border border-[#E6E0D6] flex-1 flex flex-col">
+              <div className="p-4 border-b" style={{ borderBottom: "1px solid #F0EAE1" }}>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <SectionDot />
+                    <h2 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>My Projects</h2>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "#9A8F7C" }}>
+                      {filteredProjects.length} of {projects.length}
+                    </span>
+                    <button
+                      onClick={() => toast.info("Add new design — coming in next step")}
+                      className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 border transition-colors"
+                      style={{ color: "#A17C50", borderColor: "rgba(161,124,80,0.3)" }}
+                    >
+                      + Add Design
+                    </button>
+                  </div>
                 </div>
                 <p className="text-[11px] leading-relaxed mb-2" style={{ color: "#7A705F" }}>
                   Click any project thumbnail to open it and access its EDS designs, or start an entirely new project.
-                  Hover over a project card to edit, duplicate, or delete it.
+                  Use the icons on each card to edit, duplicate, or delete it.
                 </p>
 
                 {/* Search + Sort */}
@@ -737,17 +981,31 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Projects grid lives here — using the real ProjectsGrid */}
-              <div className="p-4">
-                <ProjectsGrid
-                  projects={filteredProjects}
-                  isLoading={projectLoading}
-                  onProjectClick={(id) => navigate(`/project/${id}`)}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onDuplicate={handleDuplicate}
-                  onAddDesign={() => toast.info("Add new design — coming in next step")}
-                />
+              {/* Project cards */}
+              <div className="p-4 flex-1">
+                {projectLoading ? (
+                  <p className="text-xs text-center py-8" style={{ color: "#9A8F7C" }}>Loading projects…</p>
+                ) : filteredProjects.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+                    <p className="text-xs font-semibold" style={{ color: "#2C2822" }}>No projects found</p>
+                    <p className="text-[11px]" style={{ color: "#9A8F7C" }}>
+                      {searchTerm ? "Try a different search term." : "Create your first project to get started."}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                    {filteredProjects.map((project) => (
+                      <ProjectCard
+                        key={project._id}
+                        project={project}
+                        onOpen={() => navigate(`/project/${project._id}`)}
+                        onEdit={() => handleEdit(project._id)}
+                        onDuplicate={() => handleDuplicate(project._id)}
+                        onDelete={() => handleDelete(project._id)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -780,7 +1038,7 @@ const Profile = () => {
       <ConfirmModal
         isOpen={!!deleteTarget}
         title="Delete Project"
-        message={`Are you sure you want to delete "${deleteTargetProject?.name || "this project"}"? This will delete all its designs too. This action cannot be undone.`}
+        message={`Are you sure you want to delete "${projects.find((p) => p._id === deleteTarget)?.name || "this project"}"? This will delete all its designs too. This action cannot be undone.`}
         confirmLabel="Delete"
         danger
         onConfirm={confirmDelete}
