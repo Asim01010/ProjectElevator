@@ -1,0 +1,1102 @@
+// src/pages/Profile.jsx
+import React, { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, Link } from "react-router-dom";
+
+import { gsap } from "gsap";
+
+import {
+  getUserProjects,
+  createProject,
+  projectReset,
+  duplicateProject,
+  deleteProject,
+} from "../redux/features/Project/projectSlice";
+import {
+  FilePenLine,
+  PlusCircle,
+  Search,
+  X,
+  Lightbulb,
+  Box,
+  HelpCircle,
+  ArrowRight,
+  Lock,
+  Mail,
+  ChevronRight,
+  Layers,
+  Eye,
+  ClipboardCheck,
+  Copy,
+  Trash2,
+  User,
+} from "lucide-react";
+import { TiArrowRight } from "react-icons/ti";
+import { GoArrowRight } from "react-icons/go";
+import {  Play } from "lucide-react";  
+import ProjectsGrid from "./components/ProjectsGrid";
+import { useToast } from "../context/useToast";
+import { RiUser3Line } from "react-icons/ri";
+// ── Shared style tokens ────────────────────────────────────────────────────────
+const glassCard = {
+  background: "rgba(255,255,255,0.55)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+  border: "1px solid rgba(161,124,80,0.18)",
+  borderRadius: "12px",
+  boxShadow:
+    "0 8px 32px rgba(161,124,80,0.10), inset 0 1px 0 rgba(255,255,255,0.7)",
+};
+
+const inputStyle = {
+  background: "rgba(255,255,255,0.6)",
+  border: "1px solid rgba(161,124,80,0.22)",
+  borderRadius: "8px",
+  color: "#2C2822",
+  fontFamily: "inherit",
+  backdropFilter: "blur(6px)",
+  outline: "none",
+  transition: "border-color .2s, box-shadow .2s",
+};
+
+const labelStyle = {
+  fontSize: "10px",
+  fontWeight: 700,
+  letterSpacing: "0.18em",
+  textTransform: "uppercase",
+  color: "rgba(161,124,80,0.75)",
+};
+
+// ── Time-ago helper (used on project cards) ─────────────────────────────────
+function timeAgo(dateInput) {
+  if (!dateInput) return "recently";
+  const date = new Date(dateInput);
+  if (Number.isNaN(date.getTime())) return "recently";
+  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+  const units = [
+    ["y", 31536000],
+    ["mo", 2592000],
+    ["d", 86400],
+    ["h", 3600],
+    ["m", 60],
+  ];
+  for (const [label, secs] of units) {
+    const val = Math.floor(seconds / secs);
+    if (val >= 1) return `${val}${label} ago`;
+  }
+  return "just now";
+}
+
+// ── Small reusable components ──────────────────────────────────────────────────
+
+function SectionDot({ color }) {
+  return (
+    <span
+      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+      style={{ backgroundColor: color || "#A17C50" }}
+    />
+  );
+}
+
+function SectionHeader({ title }) {
+  return (
+    <div
+      className="flex items-center gap-2 p-2 border-b"
+      style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
+    >
+      <SectionDot />
+      <h2
+        className="text-[11px] font-bold uppercase tracking-wider"
+        style={{ color: "#2C2822" }}
+      >
+        {title}
+      </h2>
+    </div>
+  );
+}
+
+function ActionLink({  label, to, onClick }) {
+  const ref = useRef(null);
+  return (
+    <Link
+      to={to || "#"}
+      ref={ref}
+      onClick={onClick}
+      onMouseEnter={() => gsap.to(ref.current, { x: 3, duration: 0.18 })}
+      onMouseLeave={() => gsap.to(ref.current, { x: 0, duration: 0.18 })}
+      className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest py-1.5 transition-colors"
+      style={{ color: "rgba(161,124,80,0.75)", textDecoration: "none" }}
+    >
+      <FilePenLine size={13} />
+      {label}
+    </Link>
+  );
+}
+
+// ── Shared modal shell (backdrop + entrance animation) ─────────────────────────
+function ModalShell({ isOpen, children, maxWidth = "max-w-md" }) {
+  const modalRef = useRef(null);
+  const contentRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      gsap.fromTo(
+        modalRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: "power2.out" }
+      );
+      gsap.fromTo(
+        contentRef.current,
+        { scale: 0.94, y: 28, opacity: 0 },
+        { scale: 1, y: 0, opacity: 1, duration: 0.45, ease: "back.out(0.7)" }
+      );
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      ref={modalRef}
+      className="fixed inset-0 z-50 flex items-center justify-center p-2"
+      style={{ background: "rgba(44,40,34,0.62)", backdropFilter: "blur(8px)" }}
+    >
+      <div ref={contentRef} className={`relative w-full ${maxWidth}`} style={glassCard}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ── Create Project Modal ───────────────────────────────────────────────────────
+function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
+  const [formData, setFormData] = useState({ name: "", company: "" });
+
+  useEffect(() => {
+    if (isOpen) setFormData({ name: "", company: "" });
+  }, [isOpen]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData, e);
+  };
+
+  return (
+    <ModalShell isOpen={isOpen}>
+      {/* Header */}
+      <div
+        className="flex items-center justify-between p-2 border-b"
+        style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
+      >
+        <div className="flex items-center gap-2">
+          <SectionDot />
+          <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
+            Create New Project
+          </h3>
+        </div>
+        <button
+          onClick={onClose}
+          className="transition-opacity hover:opacity-60"
+          style={{ color: "rgba(161,124,80,0.6)" }}
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="p-2 space-y-5">
+        <div>
+          <label style={labelStyle} className="block mb-1.5">Project Name *</label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            style={inputStyle}
+            className="w-full px-3 py-2.5 text-sm"
+            placeholder="e.g. Residential Tower Lift"
+            onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
+            onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
+            required
+          />
+        </div>
+        <div>
+          <label style={labelStyle} className="block mb-1.5">Company Name *</label>
+          <input
+            type="text"
+            value={formData.company}
+            onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+            style={inputStyle}
+            className="w-full px-3 py-2.5 text-sm"
+            placeholder="e.g. ABC Elevators Pvt Ltd"
+            onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
+            onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
+            required
+          />
+        </div>
+
+        <div className="flex gap-3 pt-3">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg disabled:opacity-50 transition-all"
+            style={{
+              backgroundColor: "#A17C50",
+              boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+            }}
+          >
+            {isLoading ? "Creating…" : "Create Project"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
+            style={{
+              background: "rgba(161,124,80,0.08)",
+              color: "rgba(161,124,80,0.7)",
+              border: "1px solid rgba(161,124,80,0.2)",
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </ModalShell>
+  );
+}
+
+// ── Confirm Modal (replaces window.confirm — used for Delete) ─────────────────
+function ConfirmModal({ isOpen, title, message, confirmLabel = "Confirm", onConfirm, onCancel, danger = true }) {
+  return (
+    <ModalShell isOpen={isOpen}>
+      {/* Header */}
+      <div
+        className="flex items-center justify-between p-2 border-b"
+        style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
+      >
+        <div className="flex items-center gap-2">
+          <SectionDot color={danger ? "#B3452F" : "#A17C50"} />
+          <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
+            {title}
+          </h3>
+        </div>
+        <button
+          onClick={onCancel}
+          className="transition-opacity hover:opacity-60"
+          style={{ color: "rgba(161,124,80,0.6)" }}
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="p-2 pb-1">
+        <p className="text-xs leading-relaxed" style={{ color: "#7A705F" }}>
+          {message}
+        </p>
+      </div>
+
+      {/* Footer */}
+      <div className="flex gap-3 p-2 pt-3">
+        <button
+          onClick={onConfirm}
+          className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg transition-all"
+          style={{
+            backgroundColor: danger ? "#B3452F" : "#A17C50",
+            boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+          }}
+        >
+          {confirmLabel}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
+          style={{
+            background: "rgba(161,124,80,0.08)",
+            color: "rgba(161,124,80,0.7)",
+            border: "1px solid rgba(161,124,80,0.2)",
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </ModalShell>
+  );
+}
+
+// ── Duplicate Modal (replaces window.prompt) ────────────────────────────────
+function DuplicateModal({ isOpen, initialName, onConfirm, onCancel }) {
+  const [name, setName] = useState(initialName || "");
+
+  useEffect(() => {
+    setName(initialName || "");
+  }, [initialName, isOpen]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (name.trim()) onConfirm(name.trim());
+  };
+
+  return (
+    <ModalShell isOpen={isOpen}>
+      <div
+        className="flex items-center justify-between p-2 border-b"
+        style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
+      >
+        <div className="flex items-center gap-2">
+          <SectionDot />
+          <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
+            Duplicate Project
+          </h3>
+        </div>
+        <button onClick={onCancel} className="transition-opacity hover:opacity-60" style={{ color: "rgba(161,124,80,0.6)" }}>
+          <X size={18} />
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="p-2 space-y-5">
+        <div>
+          <label style={labelStyle} className="block mb-1.5">New Project Name *</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            style={inputStyle}
+            className="w-full px-3 py-2.5 text-sm"
+            placeholder="e.g. Residential Tower Lift (Copy)"
+            autoFocus
+            required
+            onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
+            onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
+          />
+        </div>
+
+        <div className="flex gap-3 pt-1">
+          <button
+            type="submit"
+            className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg transition-all"
+            style={{
+              backgroundColor: "#A17C50",
+              boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+            }}
+          >
+            Duplicate
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
+            style={{
+              background: "rgba(161,124,80,0.08)",
+              color: "rgba(161,124,80,0.7)",
+              border: "1px solid rgba(161,124,80,0.2)",
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </ModalShell>
+  );
+}
+
+// ── Quick-action tile (top row of the main column) ──────────────────────────
+function QuickActionTile({ icon: Icon, title, subtitle, onClick }) {
+  const ref = useRef(null);
+  return (
+    <button
+      ref={ref}
+      onClick={onClick}
+      onMouseEnter={() => gsap.to(ref.current, { y: -3, duration: 0.2 })}
+      onMouseLeave={() => gsap.to(ref.current, { y: 0, duration: 0.2 })}
+      className="flex items-center gap-3 text-left rounded-lg bg-[flex items-center gap-3 text-left bg-white border border-[#E6E0D6] p-2 sm:p-3 w-full transition-shadow hover:shadow-md] border border-[#E6E0D6] p-2 sm:p-3 w-full transition-shadow hover:shadow-md"
+      style={{ fontFamily: "inherit" }}
+    >
+      <span
+        className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+        style={{ color: "#A17C50" }}
+      >
+        <Icon size={25} />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-xs font-bold" style={{ color: "#2C2822" }}>{title}</span>
+        <span className="block text-[10px] truncate" style={{ color: "#9A8F7C" }}>{subtitle}</span>
+      </span>
+  <GoArrowRight size={20} color="#9A8F7C" />
+
+    </button>
+  );
+}
+
+// ── Single project card (matches the reference image's card layout) ─────────
+function ProjectCard({ project, onOpen, onEdit, onDuplicate, onDelete }) {
+  return (
+    <div className="bg-white border border-[#E6E0D6] overflow-hidden flex flex-col transition-shadow hover:shadow-md">
+      <div
+        onClick={onOpen}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && onOpen()}
+        className="relative h-24 cursor-pointer overflow-hidden flex items-center justify-center"
+        style={{ background: "linear-gradient(135deg, #2C2822, #4A4032)" }}
+      >
+        <Box size={26} className="text-white/25" />
+        <span className="absolute top-2 left-2 w-2 h-2 rounded-full" style={{ background: "#A17C50" }} />
+      </div>
+
+      <div className="p-2.5 flex flex-col gap-0.5 flex-1">
+        <h4
+          onClick={onOpen}
+          className="text-xs font-bold cursor-pointer truncate"
+          style={{ color: "#2C2822" }}
+        >
+          {project.name}
+        </h4>
+        <p className="text-[10px] truncate" style={{ color: "#9A8F7C" }}>{project.company}</p>
+        <p className="text-[9px] mb-1" style={{ color: "#B8AD98" }}>Modified {timeAgo(project.createdAt)}</p>
+
+        <div className="flex items-center gap-3 mt-auto pt-2 border-t" style={{ borderColor: "#F0EAE1" }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            title="Edit"
+            className="transition-colors"
+            style={{ color: "#9A8F7C" }}
+          >
+            <FilePenLine size={13} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+            title="Duplicate"
+            className="transition-colors"
+            style={{ color: "#9A8F7C" }}
+          >
+            <Copy size={13} />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            title="Delete"
+            className="transition-colors ml-auto"
+            style={{ color: "#9A8F7C" }}
+          >
+            <Trash2 size={13} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Profile Component ─────────────────────────────────────────────────────
+const Profile = () => {
+  const dispatch  = useDispatch();
+  const navigate  = useNavigate();
+  const toast = useToast();
+
+  const containerRef = useRef(null);
+  const headerRef    = useRef(null);
+
+  const {
+    projects,
+    projectLoading,
+    projectSuccess,
+    projectError,
+    projectMessage,
+    lastCreatedSubprojectId,
+  } = useSelector((state) => state.project);
+
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [searchTerm, setSearchTerm]           = useState("");
+  const [sortMode, setSortMode]               = useState("date");
+
+  // ── New: modal-driven state for delete/duplicate (replaces window.confirm/prompt) ──
+  const [deleteTarget, setDeleteTarget]       = useState(null); // projectId pending delete
+  const [duplicateTarget, setDuplicateTarget] = useState(null); // { id, name } pending duplicate
+
+  // ── Fetch on mount ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    dispatch(getUserProjects());
+  }, [dispatch]);
+
+  // ── Entrance animation ─────────────────────────────────────────────────────
+  useEffect(() => {
+    const tl = gsap.timeline();
+    tl.fromTo(containerRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.5, ease: "power2.out" }
+    ).fromTo(headerRef.current,
+      { opacity: 0, y: -16 },
+      { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+      "-=0.2"
+    );
+  }, []);
+
+  // ── Toast + reset + redirect ───────────────────────────────────────────────
+  useEffect(() => {
+    if (projectSuccess) {
+      toast.success(projectMessage || "Operation successful");
+
+      if (
+        projectMessage?.toLowerCase().includes("created") &&
+        lastCreatedSubprojectId
+      ) {
+        const subId = lastCreatedSubprojectId;
+        dispatch(projectReset());
+        navigate(`/design/${subId}`); // ✅ subproject id, NOT project id
+        return;
+      }
+
+      dispatch(projectReset());
+    }
+
+    if (projectError) {
+      toast.error(projectMessage || "Something went wrong");
+      dispatch(projectReset());
+    }
+  }, [
+    projectSuccess,
+    projectError,
+    projectMessage,
+    lastCreatedSubprojectId,
+    navigate,
+    dispatch,
+  ]);
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+  const handleCreateProject = (formData, e) => {
+    e?.preventDefault();
+    if (!formData.name.trim() || !formData.company.trim()) {
+      return toast.error("Project name and company are required");
+    }
+    dispatch(createProject(formData));
+    setShowCreateModal(false);
+  };
+
+  // Opens the confirm modal instead of window.confirm
+  const handleDelete = (projectId) => {
+    setDeleteTarget(projectId);
+  };
+
+  const confirmDelete = () => {
+    if (deleteTarget) dispatch(deleteProject(deleteTarget));
+    setDeleteTarget(null);
+  };
+
+  // Opens the duplicate modal instead of window.prompt
+  const handleDuplicate = (projectId) => {
+    const found = projects.find((p) => p._id === projectId);
+    setDuplicateTarget({ id: projectId, name: `${found?.name || ""} (Copy)` });
+  };
+
+  const confirmDuplicate = (newName) => {
+    if (duplicateTarget) {
+      dispatch(duplicateProject({ id: duplicateTarget.id, newName }));
+    }
+    setDuplicateTarget(null);
+  };
+
+  const handleEdit = (projectId) => {
+    toast.info("Edit project name/company — coming soon");
+  };
+
+  // ── Client-side filter & sort ──────────────────────────────────────────────
+  const filteredProjects = projects
+    .filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      if (sortMode === "az")   return a.name.localeCompare(b.name);
+      if (sortMode === "za")   return b.name.localeCompare(a.name);
+      if (sortMode === "date") return new Date(b.createdAt) - new Date(a.createdAt);
+      return 0;
+    });
+
+  const sortBtnStyle = (mode) => ({
+    padding: "0.35rem 0.75rem",
+    fontSize: "9px",
+    fontWeight: 700,
+    letterSpacing: "0.12em",
+    textTransform: "uppercase",
+    border: "1px solid rgba(161,124,80,0.25)",
+    borderRadius: "6px",
+    cursor: "pointer",
+    transition: "all .2s",
+    background: sortMode === mode ? "#A17C50" : "rgba(255,255,255,0.6)",
+    color:      sortMode === mode ? "#fff"     : "rgba(161,124,80,0.7)",
+    fontFamily: "inherit",
+  });
+
+  // ── Quick-action tiles (top of the main 8-col area) ─────────────────────────
+  const quickActions = [
+    {
+      icon: Lightbulb,
+      title: "Get Inspired",
+      subtitle: "Explore ideas & designs",
+      onClick: () => toast.info("Get Inspired — coming soon"),
+    },
+    {
+      icon: PlusCircle,
+      title: "Start New Project",
+      subtitle: "Create a new design",
+      onClick: () => setShowCreateModal(true), // same action as the Create New Project card
+    },
+    {
+      icon: Box,
+      title: "Sample Box",
+      subtitle: "Order material samples",
+      onClick: () => toast.info("Sample Box — coming soon"),
+    },
+    {
+      icon: HelpCircle,
+      title: "Help Center",
+      subtitle: "Guides & support",
+      onClick: () => toast.info("Help Center — coming soon"),
+    },
+  ];
+
+  // ── The 4 steps shown in the hero banner ─────────────────────────────────────
+ const guideSteps = [
+  {
+    icon: Box,
+    title: "CHOOSE CONFIGURATION",
+    description: "Select your base elevator layout",
+  },
+  {
+    icon: Layers,
+    title: "CUSTOMIZE DETAILS",
+    description: "Pick materials, panels, handrails & more",
+  },
+  {
+    icon: Eye,
+    title: "REVIEW IN 3D",
+    description: "See your design in realistic 3D",
+  },
+  {
+    icon: ClipboardCheck,
+    title: "SAVE & SHARE",
+    description: "Download, share or request a quote",
+  },
+];
+
+  return (
+    <div
+      ref={containerRef}
+      className="min-h-screen w-full relative overflow-x-hidden"
+      style={{
+        backgroundColor: "#F7F4ED",
+        fontFamily: "'DM Sans', sans-serif",
+        opacity: 0,
+        paddingTop: "40px",    /* clear fixed navbar */
+        paddingBottom: "52px",
+         /* clear fixed footer */
+      }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+        input::placeholder { color: rgba(120,106,88,0.4); }
+      `}</style>
+
+      {/* Ambient glow blobs */}
+      <div className="fixed top-0 left-0 w-96 h-96 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.07) 0%, transparent 70%)", zIndex: 0 }} />
+      <div className="fixed bottom-0 right-0 w-80 h-80 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.05) 0%, transparent 70%)", zIndex: 0 }} />
+
+      <div className="relative z-10 max-w-8xl mx-auto px-4 sm:px-6 lg:px-12 py-10">
+
+        {/* ── Page header ── */}
+        <div ref={headerRef} className="mb-2">
+          {/* Breadcrumb */}
+          {/* <p className="text-[10px] font-bold uppercase tracking-[0.18em] flex items-center gap-2 mb-2"
+            style={{ color: "rgba(161,124,80,0.55)" }}>
+            <Link to="/" className="hover:opacity-70 transition-opacity" style={{ color: "inherit" }}>Home</Link>
+            <span style={{ color: "rgba(161,124,80,0.3)" }}>›</span>
+            <span style={{ color: "#A17C50" }}>My Profile</span>
+          </p> */}
+
+          {/* <div className="flex items-center gap-4">
+            <div className="w-1 h-10 rounded-full flex-shrink-0" style={{ background: "#A17C50" }} />
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400, fontSize: "clamp(22px, 4vw, 34px)", color: "#2C2822", lineHeight: 1.2 }}>
+              My Profile
+              <span className="font-light ml-3" style={{ color: "#A17C50", fontSize: "0.75em" }}>
+                | Elevator Design Studio
+              </span>
+            </h1>
+          </div> */}
+        </div>
+
+        {/* ── Main layout: sidebar (4 cols) + everything else (8 cols) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 ">
+
+          {/* ══════════════════ Sidebar — 4 cols ══════════════════ */}
+          <div className="lg:col-span-4 flex flex-col gap-3">
+
+            {/* My Account — dark card, matches the reference image */}
+            <div className="bg-[#1B1B1B] text-white p-2 sm:p-2 relative overflow-hidden flex flex-col flex-1 rounded-lg border border-white/10">
+              {/* <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.14) 0%, transparent 70%)" }} /> */}
+
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-center justify-between mb-2 pb-3 border-b border-white/10">
+                  <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/90">
+                    <User color="#A17C50" />
+                    My Account
+                  </span>
+                  <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-1 bg-white/5 text-white/70 border border-white/15">
+                    Active
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-3 mb-3">
+                  <img
+                    src="/123.jpg"
+                    alt="Profile"
+                    className="w-46 h-46 object-cover rounded-lg border border-white/15 flex-shrink-0"
+                  />
+                  <div className="flex flex-col gap-0.5 text-center" >
+                    <h3 className="text-2xl font-medium text-white/70" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Welcome back, 
+                    </h3>
+                    <p className="text-3xl text-white/70">Jhon !</p>  
+                    <p className="text-[13px] text-white/70">Let's create something extraordinary.</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5 mb-3">
+
+                    <Link
+                    to="/profile-edit"
+                    className="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row"
+                  >
+                    <span
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}
+                    >
+                      <RiUser3Line size={14} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-xs font-semibold">Edit Profile</span>
+                      <span className="block text-[10px] text-white/45">Manage your personal information</span>
+                    </span>
+                    <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
+                  </Link>
+                  <Link
+                    to="/profile-edit"
+                    className="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row"
+                  >
+                    <span
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}
+                    >
+                      <Lock size={14} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-xs font-semibold">Security &amp; Password</span>
+                      <span className="block text-[10px] text-white/45">Update your login credentials</span>
+                    </span>
+                    <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
+                  </Link>
+
+                  <Link
+                    to="/profile-edit"
+                    className="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row"
+                  >
+                    <span
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}
+                    >
+                      <Mail size={14} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-xs font-semibold">Contact Information</span>
+                      <span className="block text-[10px] text-white/45">Update your contact details</span>
+                    </span>
+                    <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
+                  </Link>
+                
+                </div>
+
+                <Link
+                  to="/profile-edit"
+                  className="mt-auto inline-flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-widest border border-white/20 text-white hover:bg-white/10 transition-colors"
+                >
+                  View Account Details
+                  <ArrowRight size={13} />
+                </Link>
+              </div>
+            </div>
+
+            {/* Create New Project — sits below My Account, same column */}
+            <div
+              className="bg-white border border-[#E6E0D6] p-2 sm:p-2 flex flex-col items-center justify-center gap-4 text-center cursor-pointer transition-transform hover:scale-[1.01] rounded-lg"
+              onClick={() => setShowCreateModal(true)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && setShowCreateModal(true)}
+            >
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center border-2 border-dashed"
+                style={{ borderColor: "rgba(161,124,80,0.4)" }}
+              >
+                <PlusCircle size={30} style={{ color: "#A17C50" }} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#2C2822" }}>
+                  Start a New Project
+                </p>
+                <p className="text-[11px] leading-relaxed" style={{ color: "#9A8F7C" }}>
+                  Click to create a new elevator interior design from scratch
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setShowCreateModal(true); }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg transition-all"
+                style={{
+                  backgroundColor: "#A17C50",
+                  boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
+                }}
+              >
+                Create New Project
+                <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+
+          {/* ══════════════════ Main content — 8 cols ══════════════════ */}
+          <div className="lg:col-span-8 flex flex-col gap-3">
+
+            {/* Quick-action tiles */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {quickActions.map((action) => (
+                <QuickActionTile key={action.title} {...action} />
+              ))}
+            </div>
+
+            {/* Hero — Quick Start Guide, matches the reference image */}
+        <div className="w-full ">
+      <div 
+       className="relative overflow-hidden rounded-xl shadow-sm border border-[#E2D8C7]"
+  style={{
+background: "radial-gradient(circle at 80% 70%, #DAD0C7 20%, #DCD0C0 100%)"
+  }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch min-h-[360px]">
+
+          {/* Left Content Area */}
+          <div className="lg:col-span-5 p-6 sm:p-10 flex flex-col justify-center ">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-widest block mb-1 text-[#A47C45]">
+                QUICK START GUIDE
+              </span>
+              <h2
+                className="text-2xl sm:text-3xl font-normal mb-2 text-[#24201D]"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Design Your Elevator in 4 Easy Steps
+              </h2>
+              <p className="text-xs sm:text-sm text-[#736859] mb-8">
+                From concept to completion—bring your vision to life.
+              </p>
+            </div>
+
+            {/* Steps Row */}
+            <div className="flex items-start justify-between relative mt-auto">
+              {guideSteps.map((step, i) => (
+                <React.Fragment key={step.title}>
+                  <div className="flex flex-col items-center text-center flex-1 px-1 z-10">
+                    
+                    {/* Step Number Circle (Above Icon) */}
+                    <div className="w-6 h-6 rounded-full bg-[#A47C45] text-white text-[11px] font-bold flex items-center justify-center mb-3 shadow-sm">
+                      {i + 1}
+                    </div>
+
+                    {/* Icon Container */}
+                    <div className="mb-3 text-[#A47C45]">
+                      <step.icon size={34} strokeWidth={1.4} />
+                    </div>
+
+                    {/* Step Titles */}
+                    <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-[#24201D] mb-1 leading-tight">
+                      {step.title.split(" ").map((word, idx) => (
+                        <React.Fragment key={idx}>
+                          {word}
+                          {idx === 0 && step.title.includes(" ") ? <br /> : " "}
+                        </React.Fragment>
+                      ))}
+                    </p>
+
+                    {/* Step Descriptions */}
+                    <p className="text-[10px] text-[#736859] leading-tight max-w-[110px]">
+                      {step.description}
+                    </p>
+                  </div>
+
+                  {/* Connecting Dashed Line */}
+                  {i < guideSteps.length - 1 && (
+                    <div className="flex-1 mt-[52px] border-t-2 border-dashed border-[#C5B7A2]" />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Image Container */}
+          <div
+            onClick={() => navigate("/how-does-it-work")}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && navigate("/how-does-it-work")}
+            className="lg:col-span-7 relative overflow-hidden group min-h-[280px] cursor-pointer"
+          >
+            <img
+              src="/ProfileImage.png"
+              alt="Elevator preview"
+              className="w-full h-full object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+
+            {/* Dark Overlay Button */}
+            <div className="absolute bottom-5 right-5">
+              <button
+                type="button"
+                className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-md bg-[#1E1B18]/90 hover:bg-[#1E1B18] text-white text-[11px] font-bold tracking-widest uppercase shadow-lg backdrop-blur-sm transition-all"
+              >
+                <div className="w-4 h-4 rounded-full border border-white/60 flex items-center justify-center">
+                  <Play size={8} className="fill-white translate-x-[0.5px]" />
+                </div>
+                WATCH 10 STEPS TUTORIAL
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+            {/* My Projects — search, sort, and cards matching the reference image */}
+            <div className="bg-white border border-[#E6E0D6] flex-1 flex flex-col">
+              <div className="p-4 border-b" style={{ borderBottom: "1px solid #F0EAE1" }}>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2">
+                    <SectionDot />
+                    <h2 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>My Projects</h2>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "#9A8F7C" }}>
+                      {filteredProjects.length} of {projects.length}
+                    </span>
+                    <button
+                      onClick={() => toast.info("Add new design — coming in next step")}
+                      className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 border transition-colors"
+                      style={{ color: "#A17C50", borderColor: "rgba(161,124,80,0.3)" }}
+                    >
+                      + Add Design
+                    </button>
+                  </div>
+                </div>
+                <p className="text-[11px] leading-relaxed mb-2" style={{ color: "#7A705F" }}>
+                  Click any project thumbnail to open it and access its EDS designs, or start an entirely new project.
+                  Use the icons on each card to edit, duplicate, or delete it.
+                </p>
+
+                {/* Search + Sort */}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  {/* Search */}
+                  <div className="relative flex-1">
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(161,124,80,0.5)" }} />
+                    <input
+                      type="text"
+                      placeholder="Search projects…"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      style={inputStyle}
+                      className="w-full pl-9 pr-3 py-2 text-xs"
+                    />
+                  </div>
+                  {/* Sort */}
+                  <div className="flex items-center gap-1.5">
+                    <span style={{ fontSize: "9px", color: "rgba(161,124,80,0.6)", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase" }}>Sort</span>
+                    {["date", "az", "za"].map((mode) => (
+                      <button key={mode} onClick={() => setSortMode(mode)} style={sortBtnStyle(mode)}>
+                        {mode === "date" ? "Date" : mode.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Project cards */}
+              <div className="p-4 flex-1">
+                {projectLoading ? (
+                  <p className="text-xs text-center py-8" style={{ color: "#9A8F7C" }}>Loading projects…</p>
+                ) : filteredProjects.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+                    <p className="text-xs font-semibold" style={{ color: "#2C2822" }}>No projects found</p>
+                    <p className="text-[11px]" style={{ color: "#9A8F7C" }}>
+                      {searchTerm ? "Try a different search term." : "Create your first project to get started."}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                    {filteredProjects.map((project) => (
+                      <ProjectCard
+                        key={project._id}
+                        project={project}
+                        onOpen={() => navigate(`/project/${project._id}`)}
+                        onEdit={() => handleEdit(project._id)}
+                        onDuplicate={() => handleDuplicate(project._id)}
+                        onDelete={() => handleDelete(project._id)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Trusted by ── */}
+        <div className="mt-2 pt-2 border-t" style={{ borderTop: "1px solid rgba(161,124,80,0.15)" }}>
+          <p className="text-[9px] font-bold uppercase tracking-[0.18em] mb-2" style={{ color: "rgba(161,124,80,0.45)" }}>
+            Trusted by Industry Leaders
+          </p>
+          <div className="flex items-center gap-6" style={{ opacity: 0.45, filter: "grayscale(1)" }}>
+            {["OTIS", "KONE", "TKE"].map((b) => (
+              <span key={b} className="font-black text-sm tracking-tighter cursor-pointer transition-all hover:opacity-100" style={{ color: "#5A4F40" }}>{b}</span>
+            ))}
+            <span className="font-light text-xs tracking-wide cursor-pointer" style={{ color: "#5A4F40" }}>Schindler</span>
+            <span className="font-light text-xs tracking-wide cursor-pointer" style={{ color: "#5A4F40" }}>Mitsubishi</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Create Project Modal ── */}
+      <CreateProjectModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSubmit={handleCreateProject}
+        isLoading={projectLoading}
+      />
+
+      {/* ── Delete Confirm Modal (replaces window.confirm) ── */}
+      <ConfirmModal
+        isOpen={!!deleteTarget}
+        title="Delete Project"
+        message={`Are you sure you want to delete "${projects.find((p) => p._id === deleteTarget)?.name || "this project"}"? This will delete all its designs too. This action cannot be undone.`}
+        confirmLabel="Delete"
+        danger
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
+      {/* ── Duplicate Modal (replaces window.prompt) ── */}
+      <DuplicateModal
+        isOpen={!!duplicateTarget}
+        initialName={duplicateTarget?.name}
+        onConfirm={confirmDuplicate}
+        onCancel={() => setDuplicateTarget(null)}
+      />
+    </div>
+  );
+};
+
+export default Profile;

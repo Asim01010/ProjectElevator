@@ -1,5 +1,5 @@
 // src/pages/Profile.jsx
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -24,17 +24,26 @@ import {
   Lock,
   Mail,
   ChevronRight,
+  ChevronDown,
   Layers,
   Eye,
   ClipboardCheck,
   Copy,
   Trash2,
   User,
+  LayoutGrid,
+  List,
+  Play,
 } from "lucide-react";
+import { GoArrowRight, GoBriefcase } from "react-icons/go";
 import ProjectsGrid from "./components/ProjectsGrid";
 import { useToast } from "../context/useToast";
 import { RiUser3Line } from "react-icons/ri";
+
 // ── Shared style tokens ────────────────────────────────────────────────────────
+const ACCENT = "#A17C50";
+const INK = "#241F19";
+
 const glassCard = {
   background: "rgba(255,255,255,0.55)",
   backdropFilter: "blur(18px)",
@@ -64,6 +73,12 @@ const labelStyle = {
   color: "rgba(161,124,80,0.75)",
 };
 
+// Soft, brand-tinted card shadow used across quick-action tiles / stat pills
+const tileShadow =
+  "0 14px 28px -12px rgba(36,31,25,0.16), 0 2px 6px -1px rgba(36,31,25,0.06)";
+const tileShadowHover =
+  "0 20px 36px -14px rgba(161,124,80,0.30), 0 4px 10px -2px rgba(36,31,25,0.08)";
+
 // ── Time-ago helper (used on project cards) ─────────────────────────────────
 function timeAgo(dateInput) {
   if (!dateInput) return "recently";
@@ -90,43 +105,8 @@ function SectionDot({ color }) {
   return (
     <span
       className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-      style={{ backgroundColor: color || "#A17C50" }}
+      style={{ backgroundColor: color || ACCENT }}
     />
-  );
-}
-
-function SectionHeader({ title }) {
-  return (
-    <div
-      className="flex items-center gap-2 p-2 border-b"
-      style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
-    >
-      <SectionDot />
-      <h2
-        className="text-[11px] font-bold uppercase tracking-wider"
-        style={{ color: "#2C2822" }}
-      >
-        {title}
-      </h2>
-    </div>
-  );
-}
-
-function ActionLink({  label, to, onClick }) {
-  const ref = useRef(null);
-  return (
-    <Link
-      to={to || "#"}
-      ref={ref}
-      onClick={onClick}
-      onMouseEnter={() => gsap.to(ref.current, { x: 3, duration: 0.18 })}
-      onMouseLeave={() => gsap.to(ref.current, { x: 0, duration: 0.18 })}
-      className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest py-1.5 transition-colors"
-      style={{ color: "rgba(161,124,80,0.75)", textDecoration: "none" }}
-    >
-      <FilePenLine size={13} />
-      {label}
-    </Link>
   );
 }
 
@@ -161,8 +141,8 @@ function ModalShell({ isOpen, children, maxWidth = "max-w-md" }) {
   return (
     <div
       ref={modalRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-2"
-      style={{ background: "rgba(44,40,34,0.62)", backdropFilter: "blur(8px)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "rgba(36,31,25,0.62)", backdropFilter: "blur(8px)" }}
     >
       <div ref={contentRef} className={`relative w-full ${maxWidth}`} style={glassCard}>
         {children}
@@ -186,28 +166,19 @@ function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
 
   return (
     <ModalShell isOpen={isOpen}>
-      {/* Header */}
-      <div
-        className="flex items-center justify-between p-2 border-b"
-        style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
-      >
+      <div className="flex items-center justify-between p-4 border-b" style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}>
         <div className="flex items-center gap-2">
           <SectionDot />
           <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
             Create New Project
           </h3>
         </div>
-        <button
-          onClick={onClose}
-          className="transition-opacity hover:opacity-60"
-          style={{ color: "rgba(161,124,80,0.6)" }}
-        >
+        <button onClick={onClose} className="transition-opacity hover:opacity-60" style={{ color: "rgba(161,124,80,0.6)" }}>
           <X size={18} />
         </button>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="p-2 space-y-5">
+      <form onSubmit={handleSubmit} className="p-4 space-y-5">
         <div>
           <label style={labelStyle} className="block mb-1.5">Project Name *</label>
           <input
@@ -217,8 +188,8 @@ function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
             style={inputStyle}
             className="w-full px-3 py-2.5 text-sm"
             placeholder="e.g. Residential Tower Lift"
-            onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
-            onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
+            onFocus={(e) => { e.target.style.borderColor = ACCENT; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
+            onBlur={(e) => { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
             required
           />
         </div>
@@ -231,8 +202,8 @@ function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
             style={inputStyle}
             className="w-full px-3 py-2.5 text-sm"
             placeholder="e.g. ABC Elevators Pvt Ltd"
-            onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
-            onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
+            onFocus={(e) => { e.target.style.borderColor = ACCENT; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
+            onBlur={(e) => { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
             required
           />
         </div>
@@ -242,10 +213,7 @@ function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
             type="submit"
             disabled={isLoading}
             className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg disabled:opacity-50 transition-all"
-            style={{
-              backgroundColor: "#A17C50",
-              boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
-            }}
+            style={{ backgroundColor: ACCENT, boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)" }}
           >
             {isLoading ? "Creating…" : "Create Project"}
           </button>
@@ -253,11 +221,7 @@ function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
             type="button"
             onClick={onClose}
             className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
-            style={{
-              background: "rgba(161,124,80,0.08)",
-              color: "rgba(161,124,80,0.7)",
-              border: "1px solid rgba(161,124,80,0.2)",
-            }}
+            style={{ background: "rgba(161,124,80,0.08)", color: "rgba(161,124,80,0.7)", border: "1px solid rgba(161,124,80,0.2)" }}
           >
             Cancel
           </button>
@@ -271,53 +235,34 @@ function CreateProjectModal({ isOpen, onClose, onSubmit, isLoading }) {
 function ConfirmModal({ isOpen, title, message, confirmLabel = "Confirm", onConfirm, onCancel, danger = true }) {
   return (
     <ModalShell isOpen={isOpen}>
-      {/* Header */}
-      <div
-        className="flex items-center justify-between p-2 border-b"
-        style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
-      >
+      <div className="flex items-center justify-between p-4 border-b" style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}>
         <div className="flex items-center gap-2">
-          <SectionDot color={danger ? "#B3452F" : "#A17C50"} />
+          <SectionDot color={danger ? "#B3452F" : ACCENT} />
           <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
             {title}
           </h3>
         </div>
-        <button
-          onClick={onCancel}
-          className="transition-opacity hover:opacity-60"
-          style={{ color: "rgba(161,124,80,0.6)" }}
-        >
+        <button onClick={onCancel} className="transition-opacity hover:opacity-60" style={{ color: "rgba(161,124,80,0.6)" }}>
           <X size={18} />
         </button>
       </div>
 
-      {/* Body */}
-      <div className="p-2 pb-1">
-        <p className="text-xs leading-relaxed" style={{ color: "#7A705F" }}>
-          {message}
-        </p>
+      <div className="p-4 pb-1">
+        <p className="text-xs leading-relaxed" style={{ color: "#7A705F" }}>{message}</p>
       </div>
 
-      {/* Footer */}
-      <div className="flex gap-3 p-2 pt-3">
+      <div className="flex gap-3 p-4 pt-3">
         <button
           onClick={onConfirm}
           className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg transition-all"
-          style={{
-            backgroundColor: danger ? "#B3452F" : "#A17C50",
-            boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
-          }}
+          style={{ backgroundColor: danger ? "#B3452F" : ACCENT, boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)" }}
         >
           {confirmLabel}
         </button>
         <button
           onClick={onCancel}
           className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
-          style={{
-            background: "rgba(161,124,80,0.08)",
-            color: "rgba(161,124,80,0.7)",
-            border: "1px solid rgba(161,124,80,0.2)",
-          }}
+          style={{ background: "rgba(161,124,80,0.08)", color: "rgba(161,124,80,0.7)", border: "1px solid rgba(161,124,80,0.2)" }}
         >
           Cancel
         </button>
@@ -341,10 +286,7 @@ function DuplicateModal({ isOpen, initialName, onConfirm, onCancel }) {
 
   return (
     <ModalShell isOpen={isOpen}>
-      <div
-        className="flex items-center justify-between p-2 border-b"
-        style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}
-      >
+      <div className="flex items-center justify-between p-4 border-b" style={{ borderBottom: "1px solid rgba(161,124,80,0.12)" }}>
         <div className="flex items-center gap-2">
           <SectionDot />
           <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>
@@ -356,7 +298,7 @@ function DuplicateModal({ isOpen, initialName, onConfirm, onCancel }) {
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-2 space-y-5">
+      <form onSubmit={handleSubmit} className="p-4 space-y-5">
         <div>
           <label style={labelStyle} className="block mb-1.5">New Project Name *</label>
           <input
@@ -368,8 +310,8 @@ function DuplicateModal({ isOpen, initialName, onConfirm, onCancel }) {
             placeholder="e.g. Residential Tower Lift (Copy)"
             autoFocus
             required
-            onFocus={e => { e.target.style.borderColor = "#A17C50"; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
-            onBlur={e =>  { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
+            onFocus={(e) => { e.target.style.borderColor = ACCENT; e.target.style.boxShadow = "0 0 0 3px rgba(161,124,80,0.1)"; }}
+            onBlur={(e) => { e.target.style.borderColor = "rgba(161,124,80,0.22)"; e.target.style.boxShadow = "none"; }}
           />
         </div>
 
@@ -377,10 +319,7 @@ function DuplicateModal({ isOpen, initialName, onConfirm, onCancel }) {
           <button
             type="submit"
             className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg transition-all"
-            style={{
-              backgroundColor: "#A17C50",
-              boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
-            }}
+            style={{ backgroundColor: ACCENT, boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)" }}
           >
             Duplicate
           </button>
@@ -388,11 +327,7 @@ function DuplicateModal({ isOpen, initialName, onConfirm, onCancel }) {
             type="button"
             onClick={onCancel}
             className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all"
-            style={{
-              background: "rgba(161,124,80,0.08)",
-              color: "rgba(161,124,80,0.7)",
-              border: "1px solid rgba(161,124,80,0.2)",
-            }}
+            style={{ background: "rgba(161,124,80,0.08)", color: "rgba(161,124,80,0.7)", border: "1px solid rgba(161,124,80,0.2)" }}
           >
             Cancel
           </button>
@@ -409,75 +344,63 @@ function QuickActionTile({ icon: Icon, title, subtitle, onClick }) {
     <button
       ref={ref}
       onClick={onClick}
-      onMouseEnter={() => gsap.to(ref.current, { y: -3, duration: 0.2 })}
-      onMouseLeave={() => gsap.to(ref.current, { y: 0, duration: 0.2 })}
-      className="flex items-center gap-3 text-left rounded-lg bg-[flex items-center gap-3 text-left bg-white border border-[#E6E0D6] p-2 sm:p-3 w-full transition-shadow hover:shadow-md] border border-[#E6E0D6] p-2 sm:p-3 w-full transition-shadow hover:shadow-md"
-      style={{ fontFamily: "inherit" }}
+      onMouseEnter={() => gsap.to(ref.current, { y: -3, boxShadow: tileShadowHover, duration: 0.22 })}
+      onMouseLeave={() => gsap.to(ref.current, { y: 0, boxShadow: tileShadow, duration: 0.22 })}
+      className="flex items-center gap-3 text-left rounded-xl bg-white p-3 w-full h-full"
+      style={{ fontFamily: "inherit", boxShadow: tileShadow, border: "1px solid rgba(230,224,214,0.9)" }}
     >
       <span
         className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{ color: "#A17C50" }}
+        style={{ color: ACCENT, background: "rgba(161,124,80,0.10)" }}
       >
-        <Icon size={25} />
+        <Icon size={19} strokeWidth={1.7} />
       </span>
-      <span className="min-w-0">
+      <span className="min-w-0 flex-1">
         <span className="block text-xs font-bold" style={{ color: "#2C2822" }}>{title}</span>
         <span className="block text-[10px] truncate" style={{ color: "#9A8F7C" }}>{subtitle}</span>
       </span>
+      <GoArrowRight size={16} color="#B8AD98" className="flex-shrink-0" />
     </button>
   );
 }
 
 // ── Single project card (matches the reference image's card layout) ─────────
-function ProjectCard({ project, onOpen, onEdit, onDuplicate, onDelete }) {
+function ProjectCard({ project, onOpen, onEdit, onDuplicate, onDelete, layout = "grid" }) {
+  const isList = layout === "list";
   return (
-    <div className="bg-white border border-[#E6E0D6] overflow-hidden flex flex-col transition-shadow hover:shadow-md">
+    <div
+      className={`bg-white border border-[#E6E0D6] rounded-lg overflow-hidden transition-shadow hover:shadow-md ${isList ? "flex items-center" : "flex flex-col"}`}
+    >
       <div
         onClick={onOpen}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => e.key === "Enter" && onOpen()}
-        className="relative h-24 cursor-pointer overflow-hidden flex items-center justify-center"
+        className={`relative cursor-pointer overflow-hidden flex items-center justify-center flex-shrink-0 ${isList ? "w-20 h-16" : "h-20 w-full"}`}
         style={{ background: "linear-gradient(135deg, #2C2822, #4A4032)" }}
       >
-        <Box size={26} className="text-white/25" />
-        <span className="absolute top-2 left-2 w-2 h-2 rounded-full" style={{ background: "#A17C50" }} />
+        <Box size={20} className="text-white/25" />
+        <span className="absolute top-1.5 left-1.5 w-1.5 h-1.5 rounded-full" style={{ background: ACCENT }} />
       </div>
 
-      <div className="p-2.5 flex flex-col gap-0.5 flex-1">
-        <h4
-          onClick={onOpen}
-          className="text-xs font-bold cursor-pointer truncate"
-          style={{ color: "#2C2822" }}
-        >
-          {project.name}
-        </h4>
-        <p className="text-[10px] truncate" style={{ color: "#9A8F7C" }}>{project.company}</p>
-        <p className="text-[9px] mb-1" style={{ color: "#B8AD98" }}>Modified {timeAgo(project.createdAt)}</p>
+      <div className={`p-2.5 flex flex-col gap-0.5 flex-1 min-w-0 ${isList ? "flex-row items-center justify-between" : ""}`}>
+        <div className="min-w-0">
+          <h4 onClick={onOpen} className="text-xs font-bold cursor-pointer truncate" style={{ color: "#2C2822" }}>
+            {project.name}
+          </h4>
+          <p className="text-[10px] truncate" style={{ color: "#9A8F7C" }}>{project.company}</p>
+          {!isList && <p className="text-[9px] mb-1" style={{ color: "#B8AD98" }}>Modified {timeAgo(project.createdAt)}</p>}
+        </div>
 
-        <div className="flex items-center gap-3 mt-auto pt-2 border-t" style={{ borderColor: "#F0EAE1" }}>
-          <button
-            onClick={(e) => { e.stopPropagation(); onEdit(); }}
-            title="Edit"
-            className="transition-colors"
-            style={{ color: "#9A8F7C" }}
-          >
+        <div className={`flex items-center gap-3 ${isList ? "" : "mt-auto pt-2 border-t"}`} style={!isList ? { borderColor: "#F0EAE1" } : {}}>
+          {isList && <span className="text-[9px] mr-1 whitespace-nowrap" style={{ color: "#B8AD98" }}>{timeAgo(project.createdAt)}</span>}
+          <button onClick={(e) => { e.stopPropagation(); onEdit(); }} title="Edit" className="transition-colors" style={{ color: "#9A8F7C" }}>
             <FilePenLine size={13} />
           </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
-            title="Duplicate"
-            className="transition-colors"
-            style={{ color: "#9A8F7C" }}
-          >
+          <button onClick={(e) => { e.stopPropagation(); onDuplicate(); }} title="Duplicate" className="transition-colors" style={{ color: "#9A8F7C" }}>
             <Copy size={13} />
           </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            title="Delete"
-            className="transition-colors ml-auto"
-            style={{ color: "#9A8F7C" }}
-          >
+          <button onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Delete" className={`transition-colors ${isList ? "" : "ml-auto"}`} style={{ color: "#9A8F7C" }}>
             <Trash2 size={13} />
           </button>
         </div>
@@ -486,14 +409,27 @@ function ProjectCard({ project, onOpen, onEdit, onDuplicate, onDelete }) {
   );
 }
 
+// ── Stat pill for the My Projects header ─────────────────────────────────────
+function StatPill({ value, label }) {
+  return (
+    <div
+      className="flex-1 min-w-[70px] rounded-lg bg-white px-3 py-2 text-center border border-[#E6E0D6]"
+      style={{ boxShadow: "0 6px 16px -8px rgba(36,31,25,0.12)" }}
+    >
+      <p className="text-sm font-bold leading-none" style={{ color: "#2C2822" }}>{value}</p>
+      <p className="text-[8px] font-bold uppercase tracking-wider mt-1" style={{ color: "#B8AD98" }}>{label}</p>
+    </div>
+  );
+}
+
 // ── Main Profile Component ─────────────────────────────────────────────────────
 const Profile = () => {
-  const dispatch  = useDispatch();
-  const navigate  = useNavigate();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const toast = useToast();
 
   const containerRef = useRef(null);
-  const headerRef    = useRef(null);
+  const headerRef = useRef(null);
 
   const {
     projects,
@@ -505,12 +441,15 @@ const Profile = () => {
   } = useSelector((state) => state.project);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [searchTerm, setSearchTerm]           = useState("");
-  const [sortMode, setSortMode]               = useState("date");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortMode, setSortMode] = useState("date");
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const [viewLayout, setViewLayout] = useState("grid"); // "grid" | "list"
+  const [expandedProjects, setExpandedProjects] = useState(false);
 
-  // ── New: modal-driven state for delete/duplicate (replaces window.confirm/prompt) ──
-  const [deleteTarget, setDeleteTarget]       = useState(null); // projectId pending delete
-  const [duplicateTarget, setDuplicateTarget] = useState(null); // { id, name } pending duplicate
+  // ── modal-driven state for delete/duplicate (replaces window.confirm/prompt) ──
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [duplicateTarget, setDuplicateTarget] = useState(null);
 
   // ── Fetch on mount ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -535,10 +474,7 @@ const Profile = () => {
     if (projectSuccess) {
       toast.success(projectMessage || "Operation successful");
 
-      if (
-        projectMessage?.toLowerCase().includes("created") &&
-        lastCreatedSubprojectId
-      ) {
+      if (projectMessage?.toLowerCase().includes("created") && lastCreatedSubprojectId) {
         const subId = lastCreatedSubprojectId;
         dispatch(projectReset());
         navigate(`/design/${subId}`); // ✅ subproject id, NOT project id
@@ -552,14 +488,7 @@ const Profile = () => {
       toast.error(projectMessage || "Something went wrong");
       dispatch(projectReset());
     }
-  }, [
-    projectSuccess,
-    projectError,
-    projectMessage,
-    lastCreatedSubprojectId,
-    navigate,
-    dispatch,
-  ]);
+  }, [projectSuccess, projectError, projectMessage, lastCreatedSubprojectId, navigate, dispatch]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleCreateProject = (formData, e) => {
@@ -571,156 +500,113 @@ const Profile = () => {
     setShowCreateModal(false);
   };
 
-  // Opens the confirm modal instead of window.confirm
-  const handleDelete = (projectId) => {
-    setDeleteTarget(projectId);
-  };
+  const handleDelete = (projectId) => setDeleteTarget(projectId);
 
   const confirmDelete = () => {
     if (deleteTarget) dispatch(deleteProject(deleteTarget));
     setDeleteTarget(null);
   };
 
-  // Opens the duplicate modal instead of window.prompt
   const handleDuplicate = (projectId) => {
     const found = projects.find((p) => p._id === projectId);
     setDuplicateTarget({ id: projectId, name: `${found?.name || ""} (Copy)` });
   };
 
   const confirmDuplicate = (newName) => {
-    if (duplicateTarget) {
-      dispatch(duplicateProject({ id: duplicateTarget.id, newName }));
-    }
+    if (duplicateTarget) dispatch(duplicateProject({ id: duplicateTarget.id, newName }));
     setDuplicateTarget(null);
   };
 
-  const handleEdit = (projectId) => {
-    toast.info("Edit project name/company — coming soon");
-  };
+  const handleEdit = () => toast.info("Edit project name/company — coming soon");
 
   // ── Client-side filter & sort ──────────────────────────────────────────────
-  const filteredProjects = projects
-    .filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    .sort((a, b) => {
-      if (sortMode === "az")   return a.name.localeCompare(b.name);
-      if (sortMode === "za")   return b.name.localeCompare(a.name);
-      if (sortMode === "date") return new Date(b.createdAt) - new Date(a.createdAt);
-      return 0;
-    });
+  const filteredProjects = useMemo(() => {
+    return projects
+      .filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .sort((a, b) => {
+        if (sortMode === "az") return a.name.localeCompare(b.name);
+        if (sortMode === "za") return b.name.localeCompare(a.name);
+        if (sortMode === "date") return new Date(b.createdAt) - new Date(a.createdAt);
+        return 0;
+      });
+  }, [projects, searchTerm, sortMode]);
 
-  const sortBtnStyle = (mode) => ({
-    padding: "0.35rem 0.75rem",
-    fontSize: "9px",
-    fontWeight: 700,
-    letterSpacing: "0.12em",
-    textTransform: "uppercase",
-    border: "1px solid rgba(161,124,80,0.25)",
-    borderRadius: "6px",
-    cursor: "pointer",
-    transition: "all .2s",
-    background: sortMode === mode ? "#A17C50" : "rgba(255,255,255,0.6)",
-    color:      sortMode === mode ? "#fff"     : "rgba(161,124,80,0.7)",
-    fontFamily: "inherit",
-  });
+  // ── Header stats (falls back gracefully if fields are absent) ──────────────
+  const stats = useMemo(() => {
+    const total = projects.length;
+    const completed = projects.filter((p) => p.status === "completed" || p.completed).length;
+    const archived = projects.filter((p) => p.status === "archived" || p.archived).length;
+    const inProgress = Math.max(total - completed - archived, 0);
+    return { total, inProgress, completed, archived };
+  }, [projects]);
+
+  const sortOptions = [
+    { key: "date", label: "Last Modified" },
+    { key: "az", label: "Name A → Z" },
+    { key: "za", label: "Name Z → A" },
+  ];
+  const currentSortLabel = sortOptions.find((s) => s.key === sortMode)?.label || "Sort";
 
   // ── Quick-action tiles (top of the main 8-col area) ─────────────────────────
   const quickActions = [
-    {
-      icon: Lightbulb,
-      title: "Get Inspired",
-      subtitle: "Explore ideas & designs",
-      onClick: () => toast.info("Get Inspired — coming soon"),
-    },
-    {
-      icon: PlusCircle,
-      title: "Start New Project",
-      subtitle: "Create a new design",
-      onClick: () => setShowCreateModal(true), // same action as the Create New Project card
-    },
-    {
-      icon: Box,
-      title: "Sample Box",
-      subtitle: "Order material samples",
-      onClick: () => toast.info("Sample Box — coming soon"),
-    },
-    {
-      icon: HelpCircle,
-      title: "Help Center",
-      subtitle: "Guides & support",
-      onClick: () => toast.info("Help Center — coming soon"),
-    },
+    { icon: Lightbulb, title: "Get Inspired", subtitle: "Explore ideas & designs", onClick: () => toast.info("Get Inspired — coming soon") },
+    { icon: PlusCircle, title: "Start New Project", subtitle: "Create a new design", onClick: () => setShowCreateModal(true) },
+    { icon: Box, title: "Sample Box", subtitle: "Order material samples", onClick: () => toast.info("Sample Box — coming soon") },
+    { icon: HelpCircle, title: "Help Center", subtitle: "Guides & support", onClick: () => toast.info("Help Center — coming soon") },
   ];
 
   // ── The 4 steps shown in the hero banner ─────────────────────────────────────
   const guideSteps = [
-    { icon: Box, title: "Choose Configuration", description: "Select your base elevator layout" },
-    { icon: Layers, title: "Customize Details", description: "Pick materials, panels, handrails & more" },
-    { icon: Eye, title: "Review in 3D", description: "See your design in realistic 3D" },
-    { icon: ClipboardCheck, title: "Save & Share", description: "Download, share or request a quote" },
+    { icon: Box, title: "CHOOSE CONFIGURATION", description: "Select your base elevator layout" },
+    { icon: Layers, title: "CUSTOMIZE DETAILS", description: "Pick materials, panels, handrails & more" },
+    { icon: Eye, title: "REVIEW IN 3D", description: "See your design in realistic 3D" },
+    { icon: ClipboardCheck, title: "SAVE & SHARE", description: "Download, share or request a quote" },
   ];
 
   return (
     <div
       ref={containerRef}
-      className="min-h-screen w-full relative overflow-x-hidden"
+      className="h-screen w-full relative overflow-hidden flex flex-col"
       style={{
         backgroundColor: "#F7F4ED",
         fontFamily: "'DM Sans', sans-serif",
         opacity: 0,
-        paddingTop: "40px",    /* clear fixed navbar */
-        paddingBottom: "52px",
-         /* clear fixed footer */
+        paddingTop: "40px",   /* clear fixed navbar */
+        paddingBottom: "10px", /* clear fixed footer */
       }}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
         input::placeholder { color: rgba(120,106,88,0.4); }
+        .projects-scroll::-webkit-scrollbar { width: 6px; }
+        .projects-scroll::-webkit-scrollbar-track { background: transparent; }
+        .projects-scroll::-webkit-scrollbar-thumb { background: rgba(161,124,80,0.25); border-radius: 999px; }
+        .projects-scroll::-webkit-scrollbar-thumb:hover { background: rgba(161,124,80,0.4); }
       `}</style>
 
       {/* Ambient glow blobs */}
       <div className="fixed top-0 left-0 w-96 h-96 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.07) 0%, transparent 70%)", zIndex: 0 }} />
       <div className="fixed bottom-0 right-0 w-80 h-80 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.05) 0%, transparent 70%)", zIndex: 0 }} />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-10">
-
-        {/* ── Page header ── */}
-        <div ref={headerRef} className="mb-2">
-          {/* Breadcrumb */}
-          {/* <p className="text-[10px] font-bold uppercase tracking-[0.18em] flex items-center gap-2 mb-2"
-            style={{ color: "rgba(161,124,80,0.55)" }}>
-            <Link to="/" className="hover:opacity-70 transition-opacity" style={{ color: "inherit" }}>Home</Link>
-            <span style={{ color: "rgba(161,124,80,0.3)" }}>›</span>
-            <span style={{ color: "#A17C50" }}>My Profile</span>
-          </p> */}
-
-          {/* <div className="flex items-center gap-4">
-            <div className="w-1 h-10 rounded-full flex-shrink-0" style={{ background: "#A17C50" }} />
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 400, fontSize: "clamp(22px, 4vw, 34px)", color: "#2C2822", lineHeight: 1.2 }}>
-              My Profile
-              <span className="font-light ml-3" style={{ color: "#A17C50", fontSize: "0.75em" }}>
-                | Elevator Design Studio
-              </span>
-            </h1>
-          </div> */}
-        </div>
+      <div ref={headerRef} className="relative z-10 flex-1 min-h-0 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col">
 
         {/* ── Main layout: sidebar (4 cols) + everything else (8 cols) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 ">
+        <div className="flex flex-col lg:flex-row gap-3 flex-1 min-h-0">
 
           {/* ══════════════════ Sidebar — 4 cols ══════════════════ */}
-          <div className="lg:col-span-4 flex flex-col gap-3">
+          <div className="lg:w-[320px] w-full flex-shrink-0 flex flex-col gap-3 min-h-0">
 
             {/* My Account — dark card, matches the reference image */}
-            <div className="bg-[#1B1B1B] text-white p-2 sm:p-2 relative overflow-hidden flex flex-col flex-1 rounded-lg border border-white/10">
-              {/* <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.14) 0%, transparent 70%)" }} /> */}
+            <div className="bg-[#1B1B1B] text-white p-3 relative overflow-hidden flex flex-col rounded-xl border border-white/10 flex-shrink-0" style={{ boxShadow: tileShadow }}>
+              <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.14) 0%, transparent 70%)" }} />
 
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="flex items-center justify-between mb-2 pb-3 border-b border-white/10">
+              <div className="relative z-10 flex flex-col">
+                <div className="flex items-center justify-between mb-2.5 pb-2.5 border-b border-white/10">
                   <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/90">
-                    <User color="#A17C50" />
+                    <User size={15} color="#C9AA82" />
                     My Account
                   </span>
-                  <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-1 bg-white/5 text-white/70 border border-white/15">
+                  <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-1 rounded bg-white/5 text-white/70 border border-white/15">
                     Active
                   </span>
                 </div>
@@ -729,27 +615,20 @@ const Profile = () => {
                   <img
                     src="/123.jpg"
                     alt="Profile"
-                    className="w-46 h-46 object-cover rounded-lg border border-white/15 flex-shrink-0"
+                    className="w-34 h-50 object-cover rounded-lg border border-white/15 flex-shrink-0"
                   />
-                  <div className="flex flex-col gap-0.5 text-center" >
-                    <h3 className="text-2xl font-medium text-white/70" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      Welcome back, 
+                  <div className="flex flex-col gap-0.5">
+                    <h3 className="text-lg font-medium text-white/85 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Welcome back,
                     </h3>
-                    <p className="text-3xl text-white/70">Jhon !</p>  
-                    <p className="text-[13px] text-white/70">Let's create something extraordinary.</p>
+                    <p className="text-xl text-white leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>Alex!</p>
+                    <p className="text-[11px] text-white/50 mt-1">Let's create something extraordinary.</p>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1.5 mb-3">
-
-                    <Link
-                    to="/profile-edit"
-                    className="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row"
-                  >
-                    <span
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}
-                    >
+                  <Link to="/profile-edit" className="flex items-center gap-3 p-2 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row">
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}>
                       <RiUser3Line size={14} />
                     </span>
                     <span className="flex-1 min-w-0">
@@ -758,14 +637,8 @@ const Profile = () => {
                     </span>
                     <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
                   </Link>
-                  <Link
-                    to="/profile-edit"
-                    className="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row"
-                  >
-                    <span
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}
-                    >
+                  <Link to="/profile-edit" className="flex items-center gap-3 p-2 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row">
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}>
                       <Lock size={14} />
                     </span>
                     <span className="flex-1 min-w-0">
@@ -774,15 +647,8 @@ const Profile = () => {
                     </span>
                     <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
                   </Link>
-
-                  <Link
-                    to="/profile-edit"
-                    className="flex items-center gap-3 p-2 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row"
-                  >
-                    <span
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}
-                    >
+                  <Link to="/profile-edit" className="flex items-center gap-3 p-2 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row">
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}>
                       <Mail size={14} />
                     </span>
                     <span className="flex-1 min-w-0">
@@ -791,12 +657,11 @@ const Profile = () => {
                     </span>
                     <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
                   </Link>
-                
                 </div>
 
                 <Link
                   to="/profile-edit"
-                  className="mt-auto inline-flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-widest border border-white/20 text-white hover:bg-white/10 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-white/20 text-white hover:bg-white/10 transition-colors"
                 >
                   View Account Details
                   <ArrowRight size={13} />
@@ -806,23 +671,21 @@ const Profile = () => {
 
             {/* Create New Project — sits below My Account, same column */}
             <div
-              className="bg-white border border-[#E6E0D6] p-2 sm:p-2 flex flex-col items-center justify-center gap-4 text-center cursor-pointer transition-transform hover:scale-[1.01] rounded-lg"
+              className="bg-white border border-[#E6E0D6] p-4 flex flex-col items-center justify-center gap-3 text-center cursor-pointer transition-transform hover:scale-[1.01] rounded-xl flex-1 min-h-0"
               onClick={() => setShowCreateModal(true)}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === "Enter" && setShowCreateModal(true)}
+              style={{ boxShadow: tileShadow }}
             >
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center border-2 border-dashed"
-                style={{ borderColor: "rgba(161,124,80,0.4)" }}
-              >
-                <PlusCircle size={30} style={{ color: "#A17C50" }} />
+              <div className="w-14 h-14 rounded-full flex items-center justify-center border-2 border-dashed" style={{ borderColor: "rgba(161,124,80,0.4)" }}>
+                <PlusCircle size={26} style={{ color: ACCENT }} />
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#2C2822" }}>
                   Start a New Project
                 </p>
-                <p className="text-[11px] leading-relaxed" style={{ color: "#9A8F7C" }}>
+                <p className="text-[11px] leading-relaxed max-w-[220px]" style={{ color: "#9A8F7C" }}>
                   Click to create a new elevator interior design from scratch
                 </p>
               </div>
@@ -830,10 +693,7 @@ const Profile = () => {
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setShowCreateModal(true); }}
                 className="inline-flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white rounded-lg transition-all"
-                style={{
-                  backgroundColor: "#A17C50",
-                  boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)",
-                }}
+                style={{ backgroundColor: ACCENT, boxShadow: "0 6px 20px -4px rgba(161,124,80,0.4), inset 0 1px 0 rgba(255,255,255,0.2)" }}
               >
                 Create New Project
                 <ArrowRight size={13} />
@@ -842,122 +702,126 @@ const Profile = () => {
           </div>
 
           {/* ══════════════════ Main content — 8 cols ══════════════════ */}
-          <div className="lg:col-span-8 flex flex-col gap-3">
+          <div className="flex-1 min-w-0 flex flex-col gap-3 min-h-0">
 
-            {/* Quick-action tiles */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {/* Quick-action tiles — shadowed cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 flex-shrink-0">
               {quickActions.map((action) => (
                 <QuickActionTile key={action.title} {...action} />
               ))}
             </div>
 
-            {/* Hero — Quick Start Guide, matches the reference image */}
-            <div className="relative overflow-hidden p-2 sm:p-2" style={{ background: "#EFE6D6" }}>
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Hero — Quick Start Guide (compact) */}
+            <div
+              className="relative overflow-hidden rounded-xl border border-[#E2D8C7] flex-shrink-0"
+              style={{ background: "radial-gradient(circle at 80% 70%, #DAD0C7 20%, #DCD0C0 100%)", boxShadow: tileShadow }}
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch" style={{ height: "328px" }}>
 
-                <div className="lg:col-span-7 flex flex-col justify-center">
-                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#A17C50" }}>
-                    Quickstart Guide
-                  </span>
-                  <h2
-                    className="text-xl sm:text-2xl font-medium mt-1 mb-1"
-                    style={{ fontFamily: "'Playfair Display', serif", color: "#2C2822" }}
-                  >
-                    Design Your Elevator in 4 Easy Steps
-                  </h2>
-                  <p className="text-[11px] leading-relaxed mb-4" style={{ color: "#7A705F" }}>
-                    From concept to completion—bring your vision to life.
-                  </p>
+                {/* Left Content Area */}
+                <div className="lg:col-span-7 px-4 py-3 flex flex-col justify-center min-w-0">
+                  <div className="mb-2">
+                    <span className="text-[11px] font-bold uppercase tracking-widest block mb-0.5 text-[#A47C45]">
+                      Quick start guide
+                    </span>
+                    <h2 className="text-sm sm:text-2xl font-bold leading-snug text-[#24201D]" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Design your elevator in 4 easy steps
+                    </h2>
+                    <p className="text-[11px] text-[#24201D] leading-tighter mt-1" style={{ maxWidth: "400px" }}>
+                      From concept to completion --- bring your vision to life.
+                    </p>
+                  </div>
 
-                  <div className="flex items-start">
+                  {/* Steps Row */}
+                  <div className="flex items-start justify-between relative">
                     {guideSteps.map((step, i) => (
                       <React.Fragment key={step.title}>
-                        <div className="flex flex-col items-center text-center w-1/4 px-1">
-                          <div className="relative mb-2">
-                            <div
-                              className="w-11 h-11 rounded-full flex items-center justify-center"
-                              style={{ background: "#fff", border: "1px solid rgba(161,124,80,0.3)", color: "#A17C50" }}
-                            >
-                              <step.icon size={17} />
-                            </div>
-                            <span
-                              className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white"
-                              style={{ background: "#A17C50" }}
-                            >
-                              {i + 1}
-                            </span>
+                        <div className="flex flex-col items-center text-center flex-1 px-0.5 z-10">
+                          <div className="w-6 h-6 rounded-full bg-[#A47C45] text-white text-[11px] font-bold flex items-center justify-center mb-1 shadow-sm">
+                            {i + 1}
                           </div>
-                          <p className="text-[9px] font-bold uppercase tracking-wide mb-0.5" style={{ color: "#2C2822" }}>
-                            {step.title}
-                          </p>
-                          <p className="text-[9px] leading-snug" style={{ color: "#9A8F7C" }}>
-                            {step.description}
+                          <div className="mb-1 text-[#A47C45]">
+                            <step.icon size={16} strokeWidth={1.6} />
+                          </div>
+                          <p className="text-[7.5px] font-bold uppercase tracking-wide text-[#24201D] leading-tight">
+                            {step.title.split(" ")[0]}
                           </p>
                         </div>
                         {i < guideSteps.length - 1 && (
-                          <div
-                            className="flex-1 mt-5 border-t-2 border-dashed"
-                            style={{ borderColor: "rgba(161,124,80,0.3)" }}
-                          />
+                          <div className="flex-1 mt-[24px] border-t border-dashed border-[#C5B7A2]" />
                         )}
                       </React.Fragment>
                     ))}
                   </div>
                 </div>
 
+                {/* Right Image Container */}
                 <div
                   onClick={() => navigate("/how-does-it-work")}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => e.key === "Enter" && navigate("/how-does-it-work")}
-                  className="lg:col-span-5 relative overflow-hidden cursor-pointer group min-h-[160px]"
+                  className="lg:col-span-5 relative overflow-hidden group cursor-pointer h-full"
                 >
                   <img
-                    src="/123456.jpg"
-                    alt="Tutorial preview"
-                    className="w-full h-full min-h-[160px] object-cover group-hover:scale-105 transition-transform duration-500"
+                    src="/ProfileImage.png"
+                    alt="Elevator preview"
+                    className="w-full h-full object-center transition-transform duration-700 ease-out"
                   />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                  <span
-                    className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white shadow-md"
-                    style={{ background: "#2C2822" }}
-                  >
-                    Watch 10 Steps Tutorial
-                    <ArrowRight size={12} />
-                  </span>
+                  <div className="absolute bottom-2 right-2">
+                   <button
+                type="button"
+                className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-md bg-[#1E1B18]/90 hover:bg-[#1E1B18] text-white text-[11px] font-bold tracking-widest uppercase shadow-lg backdrop-blur-sm transition-all"
+              >
+                <div className="w-4 h-4 rounded-full border border-white/60 flex items-center justify-center">
+                  <Play size={8} className="fill-white translate-x-[0.5px]" />
+                </div>
+                WATCH 10 STEPS TUTORIAL
+              </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* My Projects — search, sort, and cards matching the reference image */}
-            <div className="bg-white border border-[#E6E0D6] flex-1 flex flex-col">
-              <div className="p-4 border-b" style={{ borderBottom: "1px solid #F0EAE1" }}>
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2">
-                    <SectionDot />
+            {/* My Projects — header (fixed) + scrollable card area */}
+            <div className="bg-white border border-[#E6E0D6] rounded-xl flex-1 min-h-0 flex flex-col overflow-hidden" style={{ boxShadow: tileShadow }}>
+
+              {/* Fixed header block */}
+              <div className="p-3 sm:p-4 border-b flex-shrink-0" style={{ borderBottom: "1px solid #F0EAE1" }}>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                  <div className="flex flex-col  gap-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                     <GoBriefcase />
                     <h2 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>My Projects</h2>
                   </div>
+                    <h2 className="text-[9px]  uppercase tracking-wider" style={{ color: "#2C2822" }}>Access your projects or continue where you left off</h2>
+                  </div>
+
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "#9A8F7C" }}>
-                      {filteredProjects.length} of {projects.length}
-                    </span>
-                    <button
-                      onClick={() => toast.info("Add new design — coming in next step")}
-                      className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 border transition-colors"
-                      style={{ color: "#A17C50", borderColor: "rgba(161,124,80,0.3)" }}
-                    >
-                      + Add Design
-                    </button>
+                    {/* Stat pills */}
+                    <div className="flex items-center gap-1.5">
+                      <StatPill value={stats.total} label="Total" />
+                      <StatPill value={stats.inProgress} label="In Progress" />
+                      <StatPill value={stats.completed} label="Completed" />
+                      <StatPill value={stats.archived} label="Archived" />
+                    </div>
+
+                    {/* View all — sits on the side of the header, next to the stats */}
+                    {filteredProjects.length > 0 && (
+                      <button
+                        onClick={() => setExpandedProjects((v) => !v)}
+                        className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest transition-colors hover:opacity-70 whitespace-nowrap pl-2 border-l"
+                        style={{ color: ACCENT, borderColor: "#F0EAE1" }}
+                      >
+                        {expandedProjects ? "Show Less" : "View All"}
+                        <ChevronRight size={12} className={`transition-transform ${expandedProjects ? "rotate-90" : ""}`} />
+                      </button>
+                    )}
                   </div>
                 </div>
-                <p className="text-[11px] leading-relaxed mb-2" style={{ color: "#7A705F" }}>
-                  Click any project thumbnail to open it and access its EDS designs, or start an entirely new project.
-                  Use the icons on each card to edit, duplicate, or delete it.
-                </p>
 
-                {/* Search + Sort */}
+                {/* Search + Sort + View toggle */}
                 <div className="flex flex-col sm:flex-row gap-2">
-                  {/* Search */}
                   <div className="relative flex-1">
                     <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(161,124,80,0.5)" }} />
                     <input
@@ -969,20 +833,63 @@ const Profile = () => {
                       className="w-full pl-9 pr-3 py-2 text-xs"
                     />
                   </div>
-                  {/* Sort */}
-                  <div className="flex items-center gap-1.5">
-                    <span style={{ fontSize: "9px", color: "rgba(161,124,80,0.6)", fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase" }}>Sort</span>
-                    {["date", "az", "za"].map((mode) => (
-                      <button key={mode} onClick={() => setSortMode(mode)} style={sortBtnStyle(mode)}>
-                        {mode === "date" ? "Date" : mode.toUpperCase()}
-                      </button>
-                    ))}
+
+                  {/* Sort dropdown */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setSortMenuOpen((v) => !v)}
+                      className="flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg whitespace-nowrap"
+                      style={{ ...inputStyle, color: "#7A705F" }}
+                    >
+                      Sort: {currentSortLabel}
+                      <ChevronDown size={12} className={`transition-transform ${sortMenuOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    {sortMenuOpen && (
+                      <div
+                        className="absolute right-0 mt-1 w-40 bg-white rounded-lg border border-[#E6E0D6] py-1 z-20"
+                        style={{ boxShadow: "0 12px 28px -8px rgba(36,31,25,0.2)" }}
+                      >
+                        {sortOptions.map((opt) => (
+                          <button
+                            key={opt.key}
+                            onClick={() => { setSortMode(opt.key); setSortMenuOpen(false); }}
+                            className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-[#F7F4ED] transition-colors"
+                            style={{ color: sortMode === opt.key ? ACCENT : "#4A4032", fontWeight: sortMode === opt.key ? 700 : 500 }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Grid / list toggle */}
+                  <div className="flex items-center rounded-lg border border-[rgba(161,124,80,0.22)] overflow-hidden flex-shrink-0">
+                    <button
+                      onClick={() => setViewLayout("grid")}
+                      className="px-2.5 py-2 transition-colors"
+                      style={{ background: viewLayout === "grid" ? ACCENT : "transparent", color: viewLayout === "grid" ? "#fff" : "rgba(161,124,80,0.6)" }}
+                      title="Grid view"
+                    >
+                      <LayoutGrid size={14} />
+                    </button>
+                    <button
+                      onClick={() => setViewLayout("list")}
+                      className="px-2.5 py-2 transition-colors"
+                      style={{ background: viewLayout === "list" ? ACCENT : "transparent", color: viewLayout === "list" ? "#fff" : "rgba(161,124,80,0.6)" }}
+                      title="List view"
+                    >
+                      <List size={14} />
+                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* Project cards */}
-              <div className="p-4 flex-1">
+              {/* Scrollable project cards — the only scrolling region on the page */}
+              <div
+                className="projects-scroll p-3 sm:p-4 flex-1 min-h-0 overflow-y-auto"
+                style={{ maxHeight: expandedProjects ? "560px" : "300px", transition: "max-height .35s ease" }}
+              >
                 {projectLoading ? (
                   <p className="text-xs text-center py-8" style={{ color: "#9A8F7C" }}>Loading projects…</p>
                 ) : filteredProjects.length === 0 ? (
@@ -993,11 +900,12 @@ const Profile = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                  <div className={viewLayout === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3" : "flex flex-col gap-2"}>
                     {filteredProjects.map((project) => (
                       <ProjectCard
                         key={project._id}
                         project={project}
+                        layout={viewLayout}
                         onOpen={() => navigate(`/project/${project._id}`)}
                         onEdit={() => handleEdit(project._id)}
                         onDuplicate={() => handleDuplicate(project._id)}
@@ -1007,21 +915,8 @@ const Profile = () => {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* ── Trusted by ── */}
-        <div className="mt-2 pt-2 border-t" style={{ borderTop: "1px solid rgba(161,124,80,0.15)" }}>
-          <p className="text-[9px] font-bold uppercase tracking-[0.18em] mb-2" style={{ color: "rgba(161,124,80,0.45)" }}>
-            Trusted by Industry Leaders
-          </p>
-          <div className="flex items-center gap-6" style={{ opacity: 0.45, filter: "grayscale(1)" }}>
-            {["OTIS", "KONE", "TKE"].map((b) => (
-              <span key={b} className="font-black text-sm tracking-tighter cursor-pointer transition-all hover:opacity-100" style={{ color: "#5A4F40" }}>{b}</span>
-            ))}
-            <span className="font-light text-xs tracking-wide cursor-pointer" style={{ color: "#5A4F40" }}>Schindler</span>
-            <span className="font-light text-xs tracking-wide cursor-pointer" style={{ color: "#5A4F40" }}>Mitsubishi</span>
+            </div>
           </div>
         </div>
       </div>
