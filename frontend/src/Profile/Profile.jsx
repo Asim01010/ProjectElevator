@@ -346,14 +346,14 @@ function QuickActionTile({ icon: Icon, title, subtitle, onClick }) {
       onClick={onClick}
       onMouseEnter={() => gsap.to(ref.current, { y: -3, boxShadow: tileShadowHover, duration: 0.22 })}
       onMouseLeave={() => gsap.to(ref.current, { y: 0, boxShadow: tileShadow, duration: 0.22 })}
-      className="flex items-center gap-3 text-left rounded-xl bg-white p-3 w-full h-full"
+      className="flex items-center gap-3 text-left rounded-lg bg-[#FAF7F2] p-3 w-full h-full"
       style={{ fontFamily: "inherit", boxShadow: tileShadow, border: "1px solid rgba(230,224,214,0.9)" }}
     >
       <span
         className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{ color: ACCENT, background: "rgba(161,124,80,0.10)" }}
+        style={{ color: "#9F6E20",  }}
       >
-        <Icon size={19} strokeWidth={1.7} />
+        <Icon size={30} strokeWidth={1.7} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-xs font-bold" style={{ color: "#2C2822" }}>{title}</span>
@@ -713,13 +713,16 @@ const Profile = () => {
 
             {/* Hero — Quick Start Guide (compact) */}
             <div
-              className="relative overflow-hidden rounded-xl border border-[#E2D8C7] flex-shrink-0"
-              style={{ background: "radial-gradient(circle at 80% 70%, #DAD0C7 20%, #DCD0C0 100%)", boxShadow: tileShadow }}
+              className="relative overflow-hidden rounded-lg border border-[#E2D8C7] flex-shrink-0"
+              style={{ 
+  background: "radial-gradient(circle at center, #F1EAE2 0%, #C6BAAE 100%)", 
+  boxShadow: tileShadow 
+}}
             >
               <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch" style={{ height: "328px" }}>
 
                 {/* Left Content Area */}
-                <div className="lg:col-span-7 px-4 py-3 flex flex-col justify-center min-w-0">
+                <div className="lg:col-span-7 px-4 py-8 flex flex-col justify-center gap-8  min-w-0">
                   <div className="mb-2">
                     <span className="text-[11px] font-bold uppercase tracking-widest block mb-0.5 text-[#A47C45]">
                       Quick start guide
@@ -733,26 +736,36 @@ const Profile = () => {
                   </div>
 
                   {/* Steps Row */}
-                  <div className="flex items-start justify-between relative">
-                    {guideSteps.map((step, i) => (
-                      <React.Fragment key={step.title}>
-                        <div className="flex flex-col items-center text-center flex-1 px-0.5 z-10">
-                          <div className="w-6 h-6 rounded-full bg-[#A47C45] text-white text-[11px] font-bold flex items-center justify-center mb-1 shadow-sm">
-                            {i + 1}
-                          </div>
-                          <div className="mb-1 text-[#A47C45]">
-                            <step.icon size={16} strokeWidth={1.6} />
-                          </div>
-                          <p className="text-[7.5px] font-bold uppercase tracking-wide text-[#24201D] leading-tight">
-                            {step.title.split(" ")[0]}
-                          </p>
-                        </div>
-                        {i < guideSteps.length - 1 && (
-                          <div className="flex-1 mt-[24px] border-t border-dashed border-[#C5B7A2]" />
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </div>
+                  <div className="relative flex items-start justify-between">
+  {/* Dashed Connecting Line (Stretched absolute background line) */}
+  <div className="absolute top-[34px] left-[10%] right-[10%] border-t-2 border-dashed border-[#C5B7A2]/70 z-0" />
+
+  {guideSteps.map((step, i) => (
+    <div key={step.title} className="flex flex-col items-center text-center flex-1 px-2 z-10">
+      
+      {/* Number Badge */}
+      <div className="w-6 h-6 rounded-full bg-[#A47C45] text-white text-[11px] font-bold flex items-center justify-center mb-2 shadow-sm ">
+        {i + 1}
+      </div>
+
+      {/* Icon Container with subtle background tile */}
+      <div className="w-12 h-12 rounded-xl bg-white/40 border border-[#A47C45]/20 flex items-center justify-center mb-2 text-[#A47C45] shadow-xs backdrop-blur-xs">
+        <step.icon size={24} strokeWidth={1.8} />
+      </div>
+
+      {/* Full Step Title */}
+      <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#24201D] mb-1 leading-snug">
+        {step.title}
+      </p>
+
+      {/* Full Step Description */}
+      <p className="text-[10px] text-[#736859] leading-tight max-w-[130px]">
+        {step.description}
+      </p>
+
+    </div>
+  ))}
+</div>
                 </div>
 
                 {/* Right Image Container */}
@@ -784,139 +797,152 @@ const Profile = () => {
             </div>
 
             {/* My Projects — header (fixed) + scrollable card area */}
-            <div className="bg-white border border-[#E6E0D6] rounded-xl flex-1 min-h-0 flex flex-col overflow-hidden" style={{ boxShadow: tileShadow }}>
+            <div className="bg-[#F8F5F0] border border-[#E6E0D6] rounded-xl flex-1 min-h-0 flex flex-col overflow-hidden" style={{ boxShadow: tileShadow }}>
 
-              {/* Fixed header block */}
-              <div className="p-3 sm:p-4 border-b flex-shrink-0" style={{ borderBottom: "1px solid #F0EAE1" }}>
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-                  <div className="flex flex-col  gap-1">
-                  <div className="flex items-center gap-2 mb-0.5">
-                     <GoBriefcase />
-                    <h2 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: "#2C2822" }}>My Projects</h2>
-                  </div>
-                    <h2 className="text-[9px]  uppercase tracking-wider" style={{ color: "#2C2822" }}>Access your projects or continue where you left off</h2>
-                  </div>
+  {/* Fixed Header Container */}
+  <div className="p-4 sm:p-5 border-b flex-shrink-0" style={{ borderBottom: "1px solid #EAE3D9" }}>
+    
+    {/* ROW 1: Title & Controls */}
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+      
+      {/* Top Left: Title & Subtitle */}
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-2">
+          <GoBriefcase className="text-[15px]" style={{ color: ACCENT }} />
+          <h2 className="text-xs font-extrabold uppercase tracking-widest" style={{ color: "#2C2822" }}>
+            My Projects
+          </h2>
+        </div>
+        <p className="text-[11px]" style={{ color: "#7A705F" }}>
+          Access your projects or continue where you left off.
+        </p>
+      </div>
 
-                  <div className="flex items-center gap-3">
-                    {/* Stat pills */}
-                    <div className="flex items-center gap-1.5">
-                      <StatPill value={stats.total} label="Total" />
-                      <StatPill value={stats.inProgress} label="In Progress" />
-                      <StatPill value={stats.completed} label="Completed" />
-                      <StatPill value={stats.archived} label="Archived" />
-                    </div>
+      {/* Top Right: Search + Sort + View Switcher */}
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        
+        {/* Search Input */}
+        <div className="relative w-48 sm:w-64">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#A17C50" }} />
+          <input
+            type="text"
+            placeholder="Search projects..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-9 pr-3 py-1.5 text-xs bg-white rounded-lg border border-[#E6E0D6] outline-none shadow-xs placeholder-[#B0A595]"
+          />
+        </div>
 
-                    {/* View all — sits on the side of the header, next to the stats */}
-                    {filteredProjects.length > 0 && (
-                      <button
-                        onClick={() => setExpandedProjects((v) => !v)}
-                        className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest transition-colors hover:opacity-70 whitespace-nowrap pl-2 border-l"
-                        style={{ color: ACCENT, borderColor: "#F0EAE1" }}
-                      >
-                        {expandedProjects ? "Show Less" : "View All"}
-                        <ChevronRight size={12} className={`transition-transform ${expandedProjects ? "rotate-90" : ""}`} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Search + Sort + View toggle */}
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="relative flex-1">
-                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(161,124,80,0.5)" }} />
-                    <input
-                      type="text"
-                      placeholder="Search projects…"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      style={inputStyle}
-                      className="w-full pl-9 pr-3 py-2 text-xs"
-                    />
-                  </div>
-
-                  {/* Sort dropdown */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setSortMenuOpen((v) => !v)}
-                      className="flex items-center gap-2 px-3 py-2 text-[10px] font-bold uppercase tracking-wider rounded-lg whitespace-nowrap"
-                      style={{ ...inputStyle, color: "#7A705F" }}
-                    >
-                      Sort: {currentSortLabel}
-                      <ChevronDown size={12} className={`transition-transform ${sortMenuOpen ? "rotate-180" : ""}`} />
-                    </button>
-                    {sortMenuOpen && (
-                      <div
-                        className="absolute right-0 mt-1 w-40 bg-white rounded-lg border border-[#E6E0D6] py-1 z-20"
-                        style={{ boxShadow: "0 12px 28px -8px rgba(36,31,25,0.2)" }}
-                      >
-                        {sortOptions.map((opt) => (
-                          <button
-                            key={opt.key}
-                            onClick={() => { setSortMode(opt.key); setSortMenuOpen(false); }}
-                            className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-[#F7F4ED] transition-colors"
-                            style={{ color: sortMode === opt.key ? ACCENT : "#4A4032", fontWeight: sortMode === opt.key ? 700 : 500 }}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Grid / list toggle */}
-                  <div className="flex items-center rounded-lg border border-[rgba(161,124,80,0.22)] overflow-hidden flex-shrink-0">
-                    <button
-                      onClick={() => setViewLayout("grid")}
-                      className="px-2.5 py-2 transition-colors"
-                      style={{ background: viewLayout === "grid" ? ACCENT : "transparent", color: viewLayout === "grid" ? "#fff" : "rgba(161,124,80,0.6)" }}
-                      title="Grid view"
-                    >
-                      <LayoutGrid size={14} />
-                    </button>
-                    <button
-                      onClick={() => setViewLayout("list")}
-                      className="px-2.5 py-2 transition-colors"
-                      style={{ background: viewLayout === "list" ? ACCENT : "transparent", color: viewLayout === "list" ? "#fff" : "rgba(161,124,80,0.6)" }}
-                      title="List view"
-                    >
-                      <List size={14} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Scrollable project cards — the only scrolling region on the page */}
-              <div
-                className="projects-scroll p-3 sm:p-4 flex-1 min-h-0 overflow-y-auto"
-                style={{ maxHeight: expandedProjects ? "560px" : "300px", transition: "max-height .35s ease" }}
-              >
-                {projectLoading ? (
-                  <p className="text-xs text-center py-8" style={{ color: "#9A8F7C" }}>Loading projects…</p>
-                ) : filteredProjects.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-                    <p className="text-xs font-semibold" style={{ color: "#2C2822" }}>No projects found</p>
-                    <p className="text-[11px]" style={{ color: "#9A8F7C" }}>
-                      {searchTerm ? "Try a different search term." : "Create your first project to get started."}
-                    </p>
-                  </div>
-                ) : (
-                  <div className={viewLayout === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3" : "flex flex-col gap-2"}>
-                    {filteredProjects.map((project) => (
-                      <ProjectCard
-                        key={project._id}
-                        project={project}
-                        layout={viewLayout}
-                        onOpen={() => navigate(`/project/${project._id}`)}
-                        onEdit={() => handleEdit(project._id)}
-                        onDuplicate={() => handleDuplicate(project._id)}
-                        onDelete={() => handleDelete(project._id)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
+        {/* Sort Menu */}
+        <div className="relative flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#A17C50]">
+            SORT BY
+          </span>
+          <button
+            onClick={() => setSortMenuOpen((v) => !v)}
+            className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold bg-white border border-[#E6E0D6] rounded-lg text-[#2C2822]"
+          >
+            {currentSortLabel}
+            <ChevronDown size={12} className={`transition-transform ${sortMenuOpen ? "rotate-180" : ""}`} />
+          </button>
+          
+          {sortMenuOpen && (
+            <div
+              className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg border border-[#E6E0D6] py-1 z-20 shadow-lg"
+            >
+              {sortOptions.map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => { setSortMode(opt.key); setSortMenuOpen(false); }}
+                  className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-[#F7F4ED] transition-colors"
+                  style={{ color: sortMode === opt.key ? ACCENT : "#4A4032", fontWeight: sortMode === opt.key ? 700 : 500 }}
+                >
+                  {opt.label}
+                </button>
+              ))}
             </div>
+          )}
+        </div>
+
+        {/* Grid / List Layout Switcher */}
+        <div className="flex items-center bg-white p-0.5 rounded-lg border border-[#E6E0D6]">
+          <button
+            onClick={() => setViewLayout("grid")}
+            className={`p-1.5 rounded-md transition-all ${viewLayout === "grid" ? "text-white shadow-xs" : "text-[#A17C50]/60 hover:text-[#A17C50]"}`}
+            style={{ background: viewLayout === "grid" ? ACCENT : "transparent" }}
+            title="Grid view"
+          >
+            <LayoutGrid size={15} />
+          </button>
+          <button
+            onClick={() => setViewLayout("list")}
+            className={`p-1.5 rounded-md transition-all ${viewLayout === "list" ? "text-white shadow-xs" : "text-[#A17C50]/60 hover:text-[#A17C50]"}`}
+            style={{ background: viewLayout === "list" ? ACCENT : "transparent" }}
+            title="List view"
+          >
+            <List size={15} />
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    {/* ROW 2: Stat Pills Grid (Below header controls) */}
+    <div className="flex items-center justify-between gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
+        <StatPill value={stats.total} label="TOTAL" />
+        <StatPill value={stats.inProgress} label="IN PROGRESS" />
+        <StatPill value={stats.completed} label="COMPLETED" />
+        <StatPill value={stats.archived} label="ARCHIVED" />
+      </div>
+
+      {/* View All / Expand Option */}
+      {filteredProjects.length > 0 && (
+        <button
+          onClick={() => setExpandedProjects((v) => !v)}
+          className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest hover:opacity-70 whitespace-nowrap pl-3"
+          style={{ color: ACCENT }}
+        >
+          {expandedProjects ? "Show Less" : "View All"}
+          <ChevronRight size={12} className={`transition-transform ${expandedProjects ? "rotate-90" : ""}`} />
+        </button>
+      )}
+    </div>
+
+  </div>
+
+  {/* Scrollable Project Cards Region */}
+  <div
+    className="projects-scroll p-4 sm:p-5 flex-1 min-h-0 overflow-y-auto"
+    style={{ maxHeight: expandedProjects ? "560px" : "320px", transition: "max-height .35s ease" }}
+  >
+    {projectLoading ? (
+      <p className="text-xs text-center py-8 text-[#9A8F7C]">Loading projects…</p>
+    ) : filteredProjects.length === 0 ? (
+      <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+        <p className="text-xs font-semibold text-[#2C2822]">No projects found</p>
+        <p className="text-[11px] text-[#9A8F7C]">
+          {searchTerm ? "Try a different search term." : "Create your first project to get started."}
+        </p>
+      </div>
+    ) : (
+      <div className={viewLayout === "grid" ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3" : "flex flex-col gap-2"}>
+        {filteredProjects.map((project) => (
+          <ProjectCard
+            key={project._id}
+            project={project}
+            layout={viewLayout}
+            onOpen={() => navigate(`/project/${project._id}`)}
+            onEdit={() => handleEdit(project._id)}
+            onDuplicate={() => handleDuplicate(project._id)}
+            onDelete={() => handleDelete(project._id)}
+          />
+        ))}
+      </div>
+    )}
+  </div>
+
+</div>
           </div>
         </div>
       </div>

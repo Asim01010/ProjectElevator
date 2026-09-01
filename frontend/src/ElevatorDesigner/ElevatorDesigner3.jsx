@@ -317,7 +317,7 @@ export default function ElevatorDesigner3() {
 
       <div className="ed3-root">
         {/* Responsive Box Frame: Zero mobile paddings */}
-        <div className="w-full max-w-[1650px] mx-auto p-0 sm:p-4 lg:px-8 lg:py-4">
+        <div className="w-full max-w-[1500px] mx-auto p-0 sm:p-4 lg:px-8 lg:py-4">
 
           {saveStatus && (
             <div className={`ed3-save-badge ${saveStatus}`}>

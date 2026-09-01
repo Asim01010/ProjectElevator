@@ -470,19 +470,18 @@ const WallpanelController = ({
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transform: scale(2.2);
+          transform: scale(1.6);
           transform-origin: center;
-          opacity: 0.6;
+        
           filter: sepia(0.3) saturate(1.1) brightness(0.9);
           transition: transform 8s cubic-bezier(0.1, 1, 0.1, 1);
         }
         .wpc-preview:hover .wpc-preview-img {
-          transform: scale(2.3) rotate(0.5deg);
+          transform: scale(1.7);
         }
         .wpc-preview-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(37,29,12,0.95) 0%, rgba(74,59,27,0.45) 60%, transparent 100%); /* Golden Amber Vignette */
           display: flex;
           flex-direction: column;
           justify-content: flex-end;
@@ -879,7 +878,7 @@ const WallpanelController = ({
                     : 'Design Selected'}
                 </div>
                 <div className="wpc-preview-actions">
-                  <div style={{ fontSize: 9, letterSpacing: '0.2em', color: '#8a8680', textTransform: 'uppercase' }}>
+                  <div style={{ fontSize: 12, letterSpacing: '0.2em', color: 'grey', textTransform: 'uppercase' }}>
                     Zone {activeZone} · {(selectedPanels[activeZone] || []).length} panel(s)
                   </div>
                   <button className="wpc-apply-btn" onClick={handleApply}>

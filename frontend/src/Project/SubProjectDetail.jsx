@@ -157,16 +157,38 @@ const SubProjectDetail = ({ subproject, projectId }) => {
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          <IconBtn icon={<MdOutlineModeEdit />} label="Edit" onClick={handleEdit} />
-          <IconBtn icon={<IoCopyOutline />} label="Copy" onClick={handleDuplicate} />
-          <IconBtn icon={<MdDeleteForever />} label="Delete" onClick={handleDelete} danger />
-          <div className="w-px h-8 mx-1.5" style={{ background: `${BRASS}22` }} />
-          <div className="text-right text-[10.5px] leading-tight" style={{ color: MUTE }}>
-            <p>Created {new Date(subproject.createdAt).toLocaleDateString()}</p>
-            <p>Modified {new Date(subproject.updatedAt).toLocaleDateString()}</p>
-          </div>
-        </div>
+        <div className="flex items-center gap-2 shrink-0">
+  {/* Primary Highlighted & Animated Edit Button */}
+  <button
+    type="button"
+    onClick={handleEdit}
+    className="relative group flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white font-semibold text-xs transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md animate-pulse hover:animate-none"
+    style={{ background: BRASS }}
+    title="Edit Subproject"
+  >
+    <MdOutlineModeEdit className="text-lg transition-transform duration-300 group-hover:rotate-12" />
+    <span>Edit</span>
+    
+    {/* Subtle pulsing outer ring glow */}
+    <span 
+      className="absolute -inset-0.5 rounded-lg opacity-40 blur-xs animate-ping pointer-events-none"
+      style={{ background: BRASS }}
+    />
+  </button>
+
+  {/* Secondary Action Buttons */}
+  <IconBtn icon={<IoCopyOutline className="text-sm" />} label="Copy" onClick={handleDuplicate} />
+  <IconBtn icon={<MdDeleteForever className="text-sm" />} label="Delete" onClick={handleDelete} danger />
+
+  {/* Divider */}
+  <div className="w-px h-8 mx-1" style={{ background: `${BRASS}22` }} />
+
+  {/* Date Timestamps */}
+  <div className="text-right text-[10.5px] leading-tight" style={{ color: MUTE }}>
+    <p>Created {new Date(subproject.createdAt).toLocaleDateString()}</p>
+    <p>Modified {new Date(subproject.updatedAt).toLocaleDateString()}</p>
+  </div>
+</div>
       </div>
 
       {/* Body */}
