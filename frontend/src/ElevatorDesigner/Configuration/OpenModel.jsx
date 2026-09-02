@@ -210,7 +210,7 @@ useEffect(() => {
             {/* Top Action Header Bar */}
   <div 
   ref={topBarRef}
-  className="absolute top-0 left-0 right-0 h-auto min-h-[90px] lg:min-h-[110px] bg-[#FFFBF0]/95 backdrop-blur-md z-10 flex flex-col items-center justify-center  gap-3 lg:gap-3 border-b border-[#D6C394] shadow-sm"
+  className="absolute top-0 left-0 right-0 h-auto min-h-[90px] lg:min-h-[100px] bg-[#FFFBF0]/95 backdrop-blur-md z-10 flex flex-col items-center justify-center  gap-3 lg:gap-3 border-b border-[#D6C394] shadow-sm"
 >
   {/* Elevator Metadata Text */}
   <div className="gsap-fade-in w-full flex flex-row items-center justify-between lg:justify-center lg:gap-8 text-left transition-all duration-300">

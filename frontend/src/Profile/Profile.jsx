@@ -39,6 +39,9 @@ import { GoArrowRight, GoBriefcase } from "react-icons/go";
 import ProjectsGrid from "./components/ProjectsGrid";
 import { useToast } from "../context/useToast";
 import { RiUser3Line } from "react-icons/ri";
+import { FaUserAlt } from "react-icons/fa";
+import { FiUserCheck } from "react-icons/fi";
+import { CiCirclePlus } from "react-icons/ci";
 
 // ── Shared style tokens ────────────────────────────────────────────────────────
 const ACCENT = "#A17C50";
@@ -413,7 +416,7 @@ function ProjectCard({ project, onOpen, onEdit, onDuplicate, onDelete, layout = 
 function StatPill({ value, label }) {
   return (
     <div
-      className="flex-1 min-w-[70px] rounded-lg bg-white px-3 py-2 text-center border border-[#E6E0D6]"
+      className="flex-1 min-w-[70px] rounded-lg bg-[#F1EAE2] px-3 py-2 text-center border border-[#E6E0D6]"
       style={{ boxShadow: "0 6px 16px -8px rgba(36,31,25,0.12)" }}
     >
       <p className="text-sm font-bold leading-none" style={{ color: "#2C2822" }}>{value}</p>
@@ -588,34 +591,34 @@ const Profile = () => {
       <div className="fixed top-0 left-0 w-96 h-96 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.07) 0%, transparent 70%)", zIndex: 0 }} />
       <div className="fixed bottom-0 right-0 w-80 h-80 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.05) 0%, transparent 70%)", zIndex: 0 }} />
 
-      <div ref={headerRef} className="relative z-10 flex-1 min-h-0 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col">
+      <div ref={headerRef} className="relative z-10 flex-1 min-h-0 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-9 pb-5.5 flex flex-col">
 
         {/* ── Main layout: sidebar (4 cols) + everything else (8 cols) ── */}
         <div className="flex flex-col lg:flex-row gap-3 flex-1 min-h-0">
 
           {/* ══════════════════ Sidebar — 4 cols ══════════════════ */}
-          <div className="lg:w-[320px] w-full flex-shrink-0 flex flex-col gap-3 min-h-0">
+          <div className="lg:w-[320px] w-full flex-shrink-0 flex flex-col gap-2 min-h-0">
 
             {/* My Account — dark card, matches the reference image */}
             <div className="bg-[#1B1B1B] text-white p-3 relative overflow-hidden flex flex-col rounded-xl border border-white/10 flex-shrink-0" style={{ boxShadow: tileShadow }}>
-              <div className="absolute -right-10 -bottom-10 w-44 h-44 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.14) 0%, transparent 70%)" }} />
+              <div className="absolute -right-10 -bottom-10 w-44 h-14 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(161,124,80,0.14) 0%, transparent 70%)" }} />
 
               <div className="relative z-10 flex flex-col">
                 <div className="flex items-center justify-between mb-2.5 pb-2.5 border-b border-white/10">
                   <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/90">
-                    <User size={15} color="#C9AA82" />
+                    <FiUserCheck size={24} color="#A17C50" />
                     My Account
                   </span>
-                  <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-1 rounded bg-white/5 text-white/70 border border-white/15">
-                    Active
-                  </span>
+               <span className="text-[9px] uppercase font-bold tracking-wider px-2 py-1 rounded bg-[#2A3B2A]/15 text-[#8AAB88] border border-[#8AAB88]">
+  Active
+</span>
                 </div>
 
                 <div className="flex items-start gap-3 mb-3">
                   <img
                     src="/123.jpg"
                     alt="Profile"
-                    className="w-34 h-50 object-cover rounded-lg border border-white/15 flex-shrink-0"
+                    className="w-40 h-50 object-cover rounded-lg border border-white/15 flex-shrink-0"
                   />
                   <div className="flex flex-col gap-0.5">
                     <h3 className="text-lg font-medium text-white/85 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -626,42 +629,42 @@ const Profile = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1.5 mb-3">
-                  <Link to="/profile-edit" className="flex items-center gap-3 p-2 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row">
-                    <span className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}>
-                      <RiUser3Line size={14} />
+                <div className="flex flex-col  mb-4">
+                  <Link to="/profile-edit" className="flex items-center gap-3 p-2  border-b border-[#A17C50]  hover:bg-white/10 transition-colors group/row">
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{  color: "#C9AA82" }}>
+                      <RiUser3Line size={20} color="#A17C50"  />
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="block text-xs font-semibold">Edit Profile</span>
                       <span className="block text-[10px] text-white/45">Manage your personal information</span>
                     </span>
-                    <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
+                    <ChevronRight size={14} className="text-[#A17C50] group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
                   </Link>
-                  <Link to="/profile-edit" className="flex items-center gap-3 p-2 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row">
-                    <span className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}>
-                      <Lock size={14} />
+                  <Link to="/profile-edit" className="flex items-center gap-3 p-2  border-b border-[#A17C50] hover:bg-white/10 transition-colors group/row">
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{  color: "#C9AA82" }}>
+                      <Lock size={20} color="#A17C50"  />
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="block text-xs font-semibold">Security &amp; Password</span>
                       <span className="block text-[10px] text-white/45">Update your login credentials</span>
                     </span>
-                    <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
+                    <ChevronRight size={14} className="text-[#A17C50] group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
                   </Link>
-                  <Link to="/profile-edit" className="flex items-center gap-3 p-2 rounded-md bg-white/5 hover:bg-white/10 border border-white/10 transition-colors group/row">
-                    <span className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(161,124,80,0.18)", color: "#C9AA82" }}>
-                      <Mail size={14} />
+                  <Link to="/profile-edit" className="flex items-center gap-3 p-2  border-b border-[#A17C50] hover:bg-white/10 transition-colors group/row">
+                    <span className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{  color: "#C9AA82" }}>
+                      <Mail size={20}  color="#A17C50" />
                     </span>
                     <span className="flex-1 min-w-0">
                       <span className="block text-xs font-semibold">Contact Information</span>
                       <span className="block text-[10px] text-white/45">Update your contact details</span>
                     </span>
-                    <ChevronRight size={14} className="text-white/30 group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
+                    <ChevronRight size={14} className="text-[#A17C50] group-hover/row:text-[#C9AA82] group-hover/row:translate-x-0.5 transition-all" />
                   </Link>
                 </div>
 
                 <Link
                   to="/profile-edit"
-                  className="inline-flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-white/20 text-white hover:bg-white/10 transition-colors"
+                  className="inline-flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-lg border border-[#A17C50] text-[#A17C50] hover:bg-white/10 transition-colors"
                 >
                   View Account Details
                   <ArrowRight size={13} />
@@ -671,15 +674,15 @@ const Profile = () => {
 
             {/* Create New Project — sits below My Account, same column */}
             <div
-              className="bg-white border border-[#E6E0D6] p-4 flex flex-col items-center justify-center gap-3 text-center cursor-pointer transition-transform hover:scale-[1.01] rounded-xl flex-1 min-h-0"
+              className="bg-white border border-[#E6E0D6] p-4 flex flex-col items-center justify-center gap-1 text-center cursor-pointer transition-transform hover:scale-[1.01] rounded-xl flex-1 min-h-0"
               onClick={() => setShowCreateModal(true)}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === "Enter" && setShowCreateModal(true)}
               style={{ boxShadow: tileShadow }}
             >
-              <div className="w-14 h-14 rounded-full flex items-center justify-center border-2 border-dashed" style={{ borderColor: "rgba(161,124,80,0.4)" }}>
-                <PlusCircle size={26} style={{ color: ACCENT }} />
+              <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ borderColor: "rgba(161,124,80,0.4)" }}>
+                <CiCirclePlus  size={46} style={{ color: ACCENT }} />
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#2C2822" }}>
@@ -702,7 +705,7 @@ const Profile = () => {
           </div>
 
           {/* ══════════════════ Main content — 8 cols ══════════════════ */}
-          <div className="flex-1 min-w-0 flex flex-col gap-3 min-h-0">
+          <div className="flex-1 min-w-0 flex flex-col gap-2 min-h-0">
 
             {/* Quick-action tiles — shadowed cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 flex-shrink-0">
@@ -719,7 +722,7 @@ const Profile = () => {
   boxShadow: tileShadow 
 }}
             >
-              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch" style={{ height: "328px" }}>
+              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch" style={{ height: "298px" }}>
 
                 {/* Left Content Area */}
                 <div className="lg:col-span-7 px-4 py-8 flex flex-col justify-center gap-8  min-w-0">
@@ -779,15 +782,15 @@ const Profile = () => {
                   <img
                     src="/ProfileImage.png"
                     alt="Elevator preview"
-                    className="w-full h-full object-center transition-transform duration-700 ease-out"
+                    className="w-full h-[300px] object-center transition-transform duration-700 ease-out"
                   />
-                  <div className="absolute bottom-2 right-2">
+                  <div className="absolute bottom-8 right-2">
                    <button
                 type="button"
                 className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-md bg-[#1E1B18]/90 hover:bg-[#1E1B18] text-white text-[11px] font-bold tracking-widest uppercase shadow-lg backdrop-blur-sm transition-all"
               >
                 <div className="w-4 h-4 rounded-full border border-white/60 flex items-center justify-center">
-                  <Play size={8} className="fill-white translate-x-[0.5px]" />
+                  <Play size={8} className="fill-white translate-x-[0.5px]" color="#A47C45"/>
                 </div>
                 WATCH 10 STEPS TUTORIAL
               </button>
@@ -800,16 +803,16 @@ const Profile = () => {
             <div className="bg-[#F8F5F0] border border-[#E6E0D6] rounded-xl flex-1 min-h-0 flex flex-col overflow-hidden" style={{ boxShadow: tileShadow }}>
 
   {/* Fixed Header Container */}
-  <div className="p-4 sm:p-5 border-b flex-shrink-0" style={{ borderBottom: "1px solid #EAE3D9" }}>
+  <div className="px-4 py-2 sm:px-4  flex-shrink-0" >
     
     {/* ROW 1: Title & Controls */}
-    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 mb-2">
       
       {/* Top Left: Title & Subtitle */}
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center gap-2">
           <GoBriefcase className="text-[15px]" style={{ color: ACCENT }} />
-          <h2 className="text-xs font-extrabold uppercase tracking-widest" style={{ color: "#2C2822" }}>
+          <h2 className="text-[9px] font-extrabold uppercase tracking-widest" style={{ color: "#2C2822" }}>
             My Projects
           </h2>
         </div>
@@ -848,13 +851,13 @@ const Profile = () => {
           
           {sortMenuOpen && (
             <div
-              className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg border border-[#E6E0D6] py-1 z-20 shadow-lg"
+              className="absolute right-0 top-full mt-1 w-20 bg-white rounded-lg border border-[#E6E0D6] py-1 z-20 shadow-lg"
             >
               {sortOptions.map((opt) => (
                 <button
                   key={opt.key}
                   onClick={() => { setSortMode(opt.key); setSortMenuOpen(false); }}
-                  className="w-full text-left px-3 py-1.5 text-[11px] hover:bg-[#F7F4ED] transition-colors"
+                  className="w-full text-left px-3 py-1 text-[9px] hover:bg-[#F7F4ED] transition-colors"
                   style={{ color: sortMode === opt.key ? ACCENT : "#4A4032", fontWeight: sortMode === opt.key ? 700 : 500 }}
                 >
                   {opt.label}
@@ -901,7 +904,7 @@ const Profile = () => {
         <button
           onClick={() => setExpandedProjects((v) => !v)}
           className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest hover:opacity-70 whitespace-nowrap pl-3"
-          style={{ color: ACCENT }}
+          style={{ color: ACCENT  }}
         >
           {expandedProjects ? "Show Less" : "View All"}
           <ChevronRight size={12} className={`transition-transform ${expandedProjects ? "rotate-90" : ""}`} />
@@ -913,7 +916,7 @@ const Profile = () => {
 
   {/* Scrollable Project Cards Region */}
   <div
-    className="projects-scroll p-4 sm:p-5 flex-1 min-h-0 overflow-y-auto"
+    className="projects-scroll px-3 sm:px-3 flex-1 min-h-0 overflow-y-auto"
     style={{ maxHeight: expandedProjects ? "560px" : "320px", transition: "max-height .35s ease" }}
   >
     {projectLoading ? (

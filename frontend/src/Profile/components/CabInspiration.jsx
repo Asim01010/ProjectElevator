@@ -9,6 +9,12 @@ import {
   FileText,
   Heart,
   Box,
+  ChevronRight,
+  ChevronDown,
+  LayoutGrid,
+  List,
+  Scale,
+  RotateCw,
 } from "lucide-react";
 import {
   FaFacebookF,
@@ -37,11 +43,52 @@ import { FiShare2 } from "react-icons/fi";
 import { PiBuildingOffice } from "react-icons/pi";
 import { TbScreenShare } from "react-icons/tb";
 import { FaArrowRight } from "react-icons/fa6";
+import { HiOutlineCube } from "react-icons/hi2";
+import { HiOutlineDocumentText } from "react-icons/hi2";
+import { HiOutlineShare } from "react-icons/hi2";
+import { PiCubeTransparentLight } from "react-icons/pi";
+import { PiDeviceMobileCameraLight } from "react-icons/pi";
+import { PiHeadsetLight } from "react-icons/pi";
 import { Link } from "react-router-dom";
 
 const CabInspiration = () => {
   const containerRef = useRef(null);
   const [activeCategory, setActiveCategory] = useState("ALL STYLES");
+  const [viewMode, setViewMode] = useState("grid");
+
+  const [steps, setSteps] = useState([
+    { label: "Configurations", shortLabel: "Config", icon: "/ConfigurationNavbar/Elevator.png",  active: true  },
+    { label: "Wall Panels",    shortLabel: "Walls",  icon: "/ConfigurationNavbar/Wallpanel.png", active: false },
+    { label: "Handrails",      shortLabel: "Rails",  icon: "/ConfigurationNavbar/handrail.png",  active: false },
+    { label: "Ceilings",       shortLabel: "Roof",   icon: "/ConfigurationNavbar/ceiling.png",   active: false },
+    { label: "Review",         shortLabel: "Review", icon: "/ConfigurationNavbar/review.png",    active: false },
+  ]);
+
+  const activeStep = steps.findIndex((step) => step.active);
+  const navRefs = useRef([]);
+
+  const handleNavClick = (index) => {
+    setSteps((prev) => prev.map((step, i) => ({ ...step, active: i === index })));
+  };
+
+  const handleNavMouseEnter = (index) => {
+    if (window.innerWidth < 1024 || !navRefs.current[index]) return;
+    gsap.to(navRefs.current[index], { scale: 1.02, duration: 0.3, ease: "power2.out" });
+  };
+
+  const handleNavMouseMove = (e, index) => {
+    if (window.innerWidth < 1024 || !navRefs.current[index]) return;
+    const rect = navRefs.current[index].getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    navRefs.current[index].style.setProperty("--mouse-x", `${x}%`);
+    navRefs.current[index].style.setProperty("--mouse-y", `${y}%`);
+  };
+
+  const handleNavMouseLeave = (index) => {
+    if (window.innerWidth < 1024 || !navRefs.current[index]) return;
+    gsap.to(navRefs.current[index], { scale: 1, duration: 0.4, ease: "power2.out" });
+  };
 
   useEffect(() => {
     gsap.fromTo(
@@ -51,7 +98,6 @@ const CabInspiration = () => {
     );
   }, []);
 
-  // ✅ Each entry now has its own icon + unique copy instead of repeating the same title/desc
   const customDesigns = [
     {
       icon: <SiCssdesignawards className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
@@ -80,7 +126,6 @@ const CabInspiration = () => {
     },
   ];
 
-  // Features Data
   const features = [
     { icon: <Pencil className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />, title: "Wall Panels" },
     { icon: <Lightbulb className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />, title: "Lighting" },
@@ -93,62 +138,30 @@ const CabInspiration = () => {
     { icon: <MdOutlineDashboardCustomize className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />, title: "Custom Graphics" },
   ];
 
-  // ✅ Unique title + description per MEDS card instead of the same copy repeated six times
-  // const meds = [
-  //   {
-  //     icon: <FaRegLightbulb className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-  //     title: "Real-Time Preview",
-  //     desc: "See every material swap update your cab instantly.",
-  //   },
-  //   {
-  //     icon: <FaDribbbleSquare className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-  //     title: "Designer-Led Palettes",
-  //     desc: "Curated combinations that always look cohesive.",
-  //   },
-  //   {
-  //     icon: <HiMiniPencilSquare className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-  //     title: "Editable Anytime",
-  //     desc: "Revisit and adjust your design before you order.",
-  //   },
-  //   {
-  //     icon: <RiVoiceRecognitionFill className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-  //     title: "Guided Support",
-  //     desc: "Our team reviews your concept before production.",
-  //   },
-  //   {
-  //     icon: <TbScreenShare className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-  //     title: "Shareable Designs",
-  //     desc: "Send a link so stakeholders can review and approve.",
-  //   },
-  //   {
-  //     icon: <PiBuildingOffice className="w-8 h-8 sm:w-10 sm:h-10 text-[#8C6239]" />,
-  //     title: "Built for Any Building",
-  //     desc: "Concepts scale from single lobbies to full portfolios.",
-  //   },
-  // ];
-
-  // Category Filter Pills
+  // Category Filter Pills (also doubles as the 5-button set referenced in the design)
   const categories = ["ALL STYLES", "INDUSTRIAL", "HEALTHCARE", "HOSPITALITY", "CORPORATE"];
 
-  // Elevator Concepts Cards Data
-  const concepts = [
-    { id: 1, title: "Natural Harmony", desc: "Warm wood tones with refined metal accents.", image: "Cab Inspiration/1.png" },
-    { id: 2, title: "Brushed Elegance", desc: "Sleek stainless finish for a modern, professional feel.", image: "Cab Inspiration/2.png" },
-    { id: 3, title: "Timeless Marble", desc: "Bright, elegant and timeless design that stands out.", image: "Cab Inspiration/3.png" },
-    { id: 4, title: "Industrial Edge", desc: "Concrete textures with dark metal details.", image: "Cab Inspiration/4.png" },
-    { id: 5, title: "Modern Bronze", desc: "Rich bronze tones that create a bold statement.", image: "Cab Inspiration/5.png" },
+  // ---- Sidebar "design journey" quick-facts (the 3x2 icon grid) ----
+  const journeyPerks = [
+    { icon: <HiOutlineCube className="w-6 h-6" />, title: "3–4 VIEWS", desc: "Front, Side, Back & Perspective" },
+    { icon: <HiOutlineDocumentText className="w-6 h-6" />, title: "INSTANT ESTIMATE", desc: "See pricing as you design" },
+    { icon: <HiOutlineShare className="w-6 h-6" />, title: "SAVE & SHARE", desc: "Share your design with your team" },
+    { icon: <PiCubeTransparentLight className="w-6 h-6" />, title: "SAMPLE BOX", desc: "Receive material samples" },
+    { icon: <PiDeviceMobileCameraLight className="w-6 h-6" />, title: "TRY THE APP", desc: "Visualize in your own space" },
+    { icon: <PiHeadsetLight className="w-6 h-6" />, title: "HELP CENTER", desc: "Guides & video tutorials" },
   ];
 
-// Get Inspired
-// const getInspired = [
-//   // { image: "howitworkssteps/getispired.png", title: "Step 1: Get Inspired", path: "/step1" },
-//   { image: "getInspired/Profile.png", title: "Step 1: Create Project" },
-//   { image: "getInspired/configuration.png", title: "Step 2: Models Selection" },
-//   { image: "getInspired/wallpanel.png", title: "Step 3: Wall Panels" },
-//   { image: "getInspired/handrail.png", title: "Step 4: Handrails and Bumpers" },
-//   { image: "getInspired/ceiling_floor.png", title: "Step 5: Ceilings and Floors" },
-//   { image: "getInspired/review.png", title: "Step 6: Review & Approve" },
-// ];
+  // Elevator Concepts Cards Data (8 cards, 4 per row)
+  const concepts = [
+    { id: 1, title: "Silver Mesh", image: "Cab Inspiration/1.png", swatches: ["#C9C9C9", "#B99B72", "#5C5C5C", "#1E1E1E"] },
+    { id: 2, title: "Urban Bronze", image: "Cab Inspiration/2.png", swatches: ["#B08A54", "#8C6239", "#3A332B", "#1E1E1E"] },
+    { id: 3, title: "Marble Elegance", image: "Cab Inspiration/3.png", swatches: ["#F5F2EC", "#D8CBB4", "#C7C3BB", "#4A463F"] },
+    { id: 4, title: "Graphite Edge", image: "Cab Inspiration/4.png", swatches: ["#6E6E6E", "#4A4A4A", "#9A9A9A", "#1A1A1A"] },
+    { id: 5, title: "Natural Oak", image: "Cab Inspiration/5.png", swatches: ["#B9793B", "#D9A24B", "#8C6239", "#3A2E22"] },
+    { id: 6, title: "Linear Grey", image: "Cab Inspiration/6.png", swatches: ["#B7B2A8", "#8C877C", "#5C574D", "#2A2822"] },
+    { id: 7, title: "Midnight Blue", image: "Cab Inspiration/7.png", swatches: ["#3C4E60", "#2C3A47", "#D8CFC0", "#1A1A1A"] },
+    { id: 8, title: "Onyx Luxe", image: "Cab Inspiration/8.png", swatches: ["#1E1B18", "#4A433A", "#D8CBB4", "#EAD9B8"] },
+  ];
 
   // Stat Highlights
   const statHighlights = [
@@ -166,12 +179,35 @@ const CabInspiration = () => {
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+        /* ── Hexagon wizard-step shape (colors unchanged: #2b2120 / #1f1918 / #dfb76c) ── */
+        @media (min-width: 1024px) {
+          .ci-navbar-wrapper { perspective: 1000px; width: 100%; }
+          .ci-navbar { display: flex; flex-direction: row; align-items: center; justify-content: start; width: 100%; }
+          .ci-step-button-container { position: relative; flex: 1; min-height: 68px; margin-right: -34px; filter: drop-shadow(0 6px 12px rgba(43,33,32,0.18)); transform-style: preserve-3d; }
+          .ci-step-button-container:last-child { margin-right: 0; }
+          .ci-step-button {
+            position: relative; width: 100%; height: 100%; min-height: 68px; display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 34px 10px 52px; background: #1f1918; color: #dfb76c; opacity: 0.85; border: none; outline: none; cursor: pointer; user-select: none;
+            clip-path: polygon(88% 0%, 100% 50%, 88% 100%, 0% 100%, 12% 50%, 0% 0%); transform-style: preserve-3d; transition: color 0.3s ease, opacity 0.3s ease;
+          }
+          .ci-step-inner-face { position: absolute; inset: 0; background: #1f1918; clip-path: polygon(88% 0%, 100% 50%, 88% 100%, 0% 100%, 12% 50%, 0% 0%); z-index: 1; pointer-events: none; transition: background 0.3s ease; }
+          .ci-step-button:hover { color: #ffffff; opacity: 1; }
+          .ci-step-button:hover .ci-step-inner-face { background: #2b2120; }
+          .ci-step-button.active { color: #ffffff; opacity: 1; }
+          .ci-step-button.active .ci-step-inner-face { background: #2b2120; }
+          .ci-step-spotlight { position: absolute; inset: 0; background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(223,183,108,0.18), transparent 60%); pointer-events: none; z-index: 2; }
+
+          .ci-bulbs-panel { display: flex; flex-direction: row; align-items: center; justify-content: space-around; width: 100%; padding: 10px 40px; background: #1f1918; margin-top: 4px; }
+          .ci-bulb-container { display: flex; align-items: center; justify-content: center; flex: 1; }
+          .ci-status-bulb { width: 10px; height: 10px; border-radius: 50%; background: #3a2f2c; border: 1px solid #dfb76c33; transition: all 0.4s ease; }
+          .ci-status-bulb.active { background: #dfb76c; border-color: #dfb76c; box-shadow: 0 0 6px #dfb76c, 0 0 14px rgba(223,183,108,0.6); }
+        }
       `}</style>
 
       {/* ----------------- SECTION 1: HERO HEADER ----------------- */}
-      <div className="w-full bg-[#FAF8F5] rounded-b-sm overflow-hidden mt-12 mb-4">
+      <div className="w-full bg-[#FAF8F5] rounded-b-sm overflow-hidden mb-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center">
-          {/* Left Side: Content */}
           <div className="p-5 sm:p-8 lg:p-10 gap-5 flex flex-col justify-center">
             <div className="pl-3 sm:pl-5 border-l-2 border-[#A17C50] mb-4">
               <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#8C6239] mb-1.5">
@@ -191,7 +227,6 @@ const CabInspiration = () => {
               Explore professionally designed elevator interiors or start with a blank canvas and build something completely your own.
             </p>
 
-            {/* Stats Highlights Grid */}
             <div className="grid grid-cols-2 sm:flex  gap-x-4 gap-y-3 mb-4">
               {statHighlights.map((stat, idx) => (
                 <div key={idx} className="flex items-start gap-2">
@@ -204,7 +239,6 @@ const CabInspiration = () => {
               ))}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-3">
               <button
                 className="
@@ -230,7 +264,6 @@ const CabInspiration = () => {
             </div>
           </div>
 
-          {/* Right Side: Image Container */}
           <div className="h-56 sm:h-64 lg:h-full w-full relative overflow-hidden bg-[#F4EFEA]">
             <img
               src="Cab Inspiration/heroinspired.png"
@@ -261,87 +294,334 @@ const CabInspiration = () => {
         </div>
       </div>
 
-      {/* ----------------- SECTION 3: EXPLORE FILTER HEADER ----------------- */}
-      <div className="max-w-7xl mx-auto mb-4 text-center">
-        <p className="text-xs font-bold uppercase tracking-widest font-bold text-[#2C2822] mb-1">
-          EXPLORE STANDARD CONCEPTS
-        </p>
-        <p className="text-xs text-[#7A705F] mb-3">
-          Browse professionally designed elevator interiors to inspire your project.
-        </p>
+      {/* ----------------- SECTION 1.5: WIZARD STEPPER (Configurations / Wall Panels / Handrails / Ceilings / Review) ----------------- */}
+     <div className="w-full max-w-7xl mx-auto mb-6">
+  {/* Desktop: 5 chevron buttons */}
+  <nav className="hidden lg:flex w-full bg-[#f9f6f0]/80 backdrop-blur-sm rounded-xl overflow-hidden border border-[#e5dfd5] p-1 shadow-sm">
+    {steps.map((step, idx) => {
+      const isFirst = idx === 0;
+      const isLast = idx === steps.length - 1;
 
-        {/* Categories Pills */}
-        <div className="flex flex-wrap items-center justify-center gap-2 border-b border-[#E6E0D6] pb-3">
-          {categories.map((cat, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold tracking-wider transition-all ${
-                activeCategory === cat
-                  ? "bg-[#8C6239] text-white shadow-sm"
-                  : "text-[#6B6355] hover:bg-[#EADBCE]/50"
+      // Define clipPath for flat left/right edges on container ends vs inner chevrons
+      let clipPathStyle = "polygon(18px 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 18px 100%, 0 50%)";
+      if (isFirst) {
+        clipPathStyle = "polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%)";
+      } else if (isLast) {
+        clipPathStyle = "polygon(18px 0, 100% 0, 100% 100%, 18px 100%, 0 50%)";
+      }
+
+      return (
+        <button
+          key={step.label}
+          type="button"
+          onClick={() => handleNavClick(idx)}
+          className={`relative flex-1 flex items-center gap-3 px-6 py-3.5 text-left transition-all duration-300 ${
+            step.active
+              ? "text-white bg-gradient-to-r from-[#b37a28] via-[#a36c1e] to-[#8c5914] shadow-md rounded-l-lg"
+              : "text-[#2b2120] hover:bg-black/5"
+          }`}
+          style={{
+            clipPath: clipPathStyle,
+            marginLeft: isFirst ? 0 : "-14px",
+            zIndex: step.active ? 20 : steps.length - idx,
+          }}
+        >
+          <span
+            className={`shrink-0 w-9 h-9 rounded-md flex items-center justify-center transition-colors ${
+              step.active ? "bg-white/20" : "bg-transparent"
+            }`}
+          >
+            <img
+              src={step.icon}
+              alt={step.shortLabel || step.label}
+              className={`object-contain w-6 h-6 transition-all ${
+                step.active ? "brightness-200" : "opacity-70"
+              }`}
+            />
+          </span>
+          <span className="flex flex-col leading-tight">
+            <span
+              className={`text-xs font-bold tracking-wider uppercase ${
+                step.active ? "text-white" : "text-[#1f1918]"
               }`}
             >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
+              {step.label}
+            </span>
+            {step.description && (
+              <span
+                className={`text-[10px] font-normal line-clamp-1 mt-0.5 ${
+                  step.active ? "text-white/80" : "text-[#7a6e65]"
+                }`}
+              >
+                {step.description}
+              </span>
+            )}
+          </span>
+        </button>
+      );
+    })}
+  </nav>
 
-      {/* ----------------- SECTION 4: CONCEPTS GRID ----------------- */}
-      <div className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 mb-4">
-        {concepts.map((concept) => (
-          <div
-            key={concept.id}
-            className="bg-white border border-[#E6E0D6] rounded-xl overflow-hidden shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow"
+  {/* Mobile: compact icon nav */}
+  <nav className="flex lg:hidden w-full items-center justify-between pt-18">
+    {steps.map((step, index) => (
+      <button
+        key={index}
+        type="button"
+        onClick={() => handleNavClick(index)}
+        className={`flex-1 flex flex-col items-center justify-center pt-3 pb-2.5 transition-all duration-200 border-b-2 ${
+          step.active
+            ? "text-[#1f1918] bg-[#f9f6f0] border-[#b37a28]"
+            : "text-[#7a6e65] border-transparent bg-transparent"
+        }`}
+      >
+        <img
+          src={step.icon}
+          alt={step.shortLabel}
+          className={`object-contain w-5 h-5 mb-1 transition-all ${
+            step.active ? "brightness-100" : "opacity-40 grayscale"
+          }`}
+        />
+        <span className="text-[10px] font-bold tracking-wider uppercase">
+          {step.shortLabel}
+        </span>
+      </button>
+    ))}
+  </nav>
+
+  {/* Progress dot-line */}
+  <div className="relative flex items-center justify-between mt-6 px-12">
+    {/* Background Base Line */}
+    <div className="absolute left-12 right-12 h-[1px] bg-[#d3cbc0] top-1/2 -translate-y-1/2" />
+
+    {/* Active Progress Line */}
+    <div
+      className="absolute left-12 h-[2px] bg-[#b37a28] top-1/2 -translate-y-1/2 transition-all duration-500 ease-out"
+      style={{
+        width: `calc(${(activeStep / (steps.length - 1)) * 100}% - ${
+          (activeStep / (steps.length - 1)) * 24
+        }px)`,
+      }}
+    />
+
+    {/* Dots matching step positions */}
+    {steps.map((step, idx) => {
+      const isActive = idx === activeStep;
+      const isPassed = idx < activeStep;
+
+      return (
+        <button
+          key={step.label}
+          aria-label={step.label}
+          onClick={() => handleNavClick(idx)}
+          className="relative z-10 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-300 bg-[#FAF8F5]"
+        >
+          <span
+            className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${
+              isActive
+                ? "bg-[#b37a28] ring-2 ring-[#b37a28]/30 scale-110"
+                : isPassed
+                ? "bg-[#b37a28]"
+                : "bg-white border-2 border-[#d3cbc0]"
+            }`}
+          />
+        </button>
+      );
+    })}
+  </div>
+</div>
+      {/* ----------------- SECTION 3+4: SIDEBAR (col-span-3) + MAIN GALLERY (col-span-9) ----------------- */}
+      <div className="max-w-7xl mx-auto mb-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* ---- Sidebar: col-span-3 ---- */}
+        <aside className="lg:col-span-3 bg-white border border-[#E6E0D6] rounded-xl p-5 flex flex-col gap-5 h-fit">
+          <div>
+            <h3
+              className="text-sm font-bold uppercase tracking-wider text-[#2C2822] mb-1"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Your Design Journey
+            </h3>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[#8C6239] mb-2">
+              {activeStep + 1} of {steps.length} &bull; View 1
+            </p>
+            <p className="text-xs text-[#6B6355] leading-relaxed">
+              Select your elevator system configuration to start building your design.
+            </p>
+          </div>
+
+          <button
+            className="
+              w-full inline-flex items-center justify-center gap-2 rounded-sm
+              bg-gradient-to-b from-[#C79A63] via-[#A67C52] to-[#7F5A34]
+              px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-white
+              shadow-[0_10px_25px_rgba(95,65,30,0.25)]
+              transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(95,65,30,0.35)]
+            "
+            onClick={() => handleNavClick(Math.min(activeStep + 1, steps.length - 1))}
           >
-            <div className="bg-[#F3ECE0] h-32 sm:h-44 overflow-hidden relative">
-              <img
-                src={concept.image}
-                alt={concept.title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
+            Next Step <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+
+          <div className="relative rounded-lg overflow-hidden bg-[#F3ECE0] aspect-[4/3]">
+            <img
+              src="Cab Inspiration/journeypreview.png"
+              alt="Elevator interior preview"
+              className="w-full h-full object-cover"
+            />
+            <button className="absolute bottom-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white hover:bg-black/75 transition-colors">
+              <RotateCw className="w-3 h-3" /> Explore in 360°
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            {journeyPerks.map((perk, idx) => (
+              <div key={idx} className="flex flex-col items-center text-center gap-1.5 p-2">
+                <span className="text-[#8C6239]">{perk.icon}</span>
+                <span className="text-[9px] font-bold uppercase tracking-wide text-[#2C2822] leading-tight">
+                  {perk.title}
+                </span>
+                <span className="text-[8.5px] text-[#8A8172] leading-snug">{perk.desc}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-lg bg-[#F3ECE0] p-3.5 flex flex-col gap-1.5">
+            <div className="flex items-center gap-1.5 text-[#8C6239]">
+              <Lightbulb className="w-4 h-4" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Tip</span>
+            </div>
+            <p className="text-xs text-[#4A4436] leading-snug">
+              Not sure which style fits your project?
+            </p>
+            <a href="#" className="text-[11px] font-bold text-[#8C6239] hover:text-[#5C4124] transition-colors inline-flex items-center gap-1">
+              View Design Guide <ChevronRight className="w-3 h-3" />
+            </a>
+          </div>
+        </aside>
+
+        {/* ---- Main gallery: col-span-9 ---- */}
+        <div className="lg:col-span-9 flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div>
+              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-[#8C6239] mb-1.5">
+                Design Elevator Interiors
+              </p>
+              <h2
+                className="text-xl sm:text-2xl lg:text-3xl font-medium tracking-tight text-[#2C2822] leading-tight"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Find Your Inspiration. Make It Yours.
+              </h2>
+              <p className="text-xs sm:text-sm text-[#6B6355] mt-1.5 max-w-xl">
+                Choose a base design you love, then customize every detail to match your vision.
+              </p>
             </div>
 
-            <div className="p-2.5 sm:p-3.5 bg-white flex justify-between items-start gap-2">
-              <div>
-                <h3 className="text-xs font-bold text-[#2C2822] mb-1">{concept.title}</h3>
-                <p className="text-[10px] text-[#7A705F] leading-snug">{concept.desc}</p>
-              </div>
-              <button
-                aria-label="Save concept"
-                className="text-[#A17C50] hover:text-[#8C6239] transition-colors pt-0.5 shrink-0"
-              >
-                <Heart className="w-4 h-4" />
+            <div className="flex items-center gap-2 shrink-0">
+              <button className="inline-flex items-center gap-1.5 rounded-sm border border-[#E6E0D6] bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-[#2C2822] hover:border-[#8C6239] transition-colors">
+                <Scale className="w-3.5 h-3.5 text-[#8C6239]" /> Compare (0)
               </button>
+              <button className="inline-flex items-center gap-1.5 rounded-sm border border-[#E6E0D6] bg-white px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-[#2C2822] hover:border-[#8C6239] transition-colors">
+                Sort By: Newest <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+              <div className="flex items-center rounded-sm border border-[#E6E0D6] overflow-hidden">
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-2 transition-colors ${viewMode === "grid" ? "bg-[#8C6239] text-white" : "bg-white text-[#8C6239]"}`}
+                  aria-label="Grid view"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-2 transition-colors ${viewMode === "list" ? "bg-[#8C6239] text-white" : "bg-white text-[#8C6239]"}`}
+                  aria-label="List view"
+                >
+                  <List className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
 
-         {/* ----------------- SECTION 5: Ruling images ----------------- */}
-          {/* <div className="max-w-7xl mx-auto mt-10 mb-2 relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-  {getInspired.map((step, idx) => (
-    <div key={idx} className="flex flex-col items-center">
-      <div className="w-full h-56 sm:h-64 rounded-xl overflow-hidden bg-[#F3ECE0]">
-        <img
-          src={step.image}
-          alt={step.title}
-          className="w-full h-full object-cover transition-opacity hover:opacity-90 cursor-pointer"
-        />
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E6E0D6] pb-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {categories.map((cat, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-3.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-bold tracking-wider transition-all ${
+                    activeCategory === cat
+                      ? "bg-[#2C2822] text-white shadow-sm"
+                      : "text-[#6B6355] hover:bg-[#EADBCE]/50"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <button className="inline-flex items-center gap-1.5 rounded-full border border-[#E6E0D6] px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold tracking-wider text-[#7F5A34] hover:bg-[#EADBCE]/50 transition-colors">
+              <Heart className="w-3.5 h-3.5" /> My Favorites
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {concepts.map((concept) => (
+              <div
+                key={concept.id}
+                className="bg-white border border-[#E6E0D6] rounded-xl overflow-hidden shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow"
+              >
+                <div className="bg-[#F3ECE0] aspect-[4/3] overflow-hidden relative">
+                  <img
+                    src={concept.image}
+                    alt={concept.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <button
+                    aria-label="Save concept"
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center text-[#A17C50] hover:text-[#8C6239] transition-colors shadow-sm"
+                  >
+                    <Heart className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="p-2.5 sm:p-3.5 bg-white flex flex-col gap-2">
+                  <div className="flex items-center gap-1.5">
+                    {concept.swatches.map((color, i) => (
+                      <span
+                        key={i}
+                        className="w-3.5 h-3.5 rounded-full border border-black/10"
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                  <h3 className="text-xs font-bold text-[#2C2822] uppercase tracking-wide">{concept.title}</h3>
+                  <button className="inline-flex items-center justify-center gap-1 rounded-sm border border-[#E6E0D6] px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-[#7F5A34] hover:bg-[#F3ECE0] transition-colors">
+                    Customize <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-[#E6E0D6] bg-[#FAF6EF] px-4 sm:px-5 py-4">
+            <div className="flex items-start gap-2.5">
+              <Lightbulb className="w-4 h-4 text-[#8C6239] mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-[#2C2822]">Don't see what you imagine?</p>
+                <p className="text-[11px] text-[#7A705F]">Start from scratch or mix elements from different designs.</p>
+              </div>
+            </div>
+            <button className="inline-flex items-center justify-center gap-2 rounded-sm bg-[#1E1B18] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-white hover:bg-black transition-colors shrink-0">
+              Start From Scratch <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
-      <p className="text-[20px] font-semibold text-[#2C2822] mt-2">
-        {step.title}
-      </p>
-    </div>
-  ))}
-</div> */}
 
       {/* SECTION Create a Custom Design */}
       <div className="w-full max-w-7xl mx-auto mb-4">
         <div className="bg-[#FAF8F5] rounded-2xl overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 w-full items-stretch">
-            {/* Left Column: Content & Steps */}
             <div className="lg:col-span-5 p-5 sm:p-8 lg:p-10 flex flex-col justify-between bg-gradient-to-b from-[#FAF8F5] to-[#F5EFE6]">
               <div>
                 <h1
@@ -387,7 +667,6 @@ const CabInspiration = () => {
               </button>
             </div>
 
-            {/* Right Column: Visual Preview */}
             <div className="lg:col-span-7 bg-[#EFE9DF] relative overflow-hidden min-h-[220px] sm:min-h-[280px] lg:min-h-full flex items-center justify-center">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-[#C79A63]/15 rounded-full blur-3xl pointer-events-none" />
               <div className="relative z-10 w-full h-full max-h-[380px] rounded-2xl overflow-hidden border border-white/60 shadow-[0_20px_40px_rgba(44,40,34,0.12)] bg-white">
@@ -401,24 +680,6 @@ const CabInspiration = () => {
           </div>
         </div>
       </div>
-
-      {/* Section MEDS */}
-      {/* <div className="max-w-7xl mx-auto mb-4">
-        <p className="uppercase  font-bold tracking-widest text-black mb-3 text-center">
-          Why designs with MEDS?
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 ">
-          {meds.map((med, idx) => (
-            <div key={idx} className="flex flex-col items-center text-center gap-2 p-3 border-e *:border-[#E6E0D6] last:border-r-0">
-              <div className="w-9 h-9 rounded-lg bg-[#F3ECE0] flex items-center justify-center text-[#8C6239] shrink-0">
-                {med.icon}
-              </div>
-              <h3 className="text-[11px] font-bold text-[#2C2822]">{med.title}</h3>
-              <p className="text-[10px] text-[#7A705F] leading-snug">{med.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div> */}
 
       {/* Section Black */}
       <div className="w-full max-w-7xl mx-auto mb-4 bg-black rounded-2xl overflow-hidden">
@@ -453,7 +714,6 @@ const CabInspiration = () => {
       <footer className="w-full bg-[#FAF8F5] text-[#2C2822] border-t border-[#E6E0D6] pt-10 pb-8 px-3 sm:px-6 lg:px-10">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row flex-wrap justify-between gap-8 mb-6">
-            {/* 1. Logo, Detail & Social Icons */}
             <div className="flex-1 min-w-[220px] max-w-sm flex flex-col gap-3">
               <Link to="/"><img src="logo/logo.png" className="w-[85%] h-full" alt="" /></Link>
 
@@ -479,7 +739,6 @@ const CabInspiration = () => {
               </div>
             </div>
 
-            {/* 2. Platform Links */}
             <div className="flex-1 min-w-[140px] flex flex-col gap-3">
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#2C2822]">Platform</h3>
               <ul className="flex flex-col gap-2 text-xs text-[#7A705F]">
@@ -490,7 +749,6 @@ const CabInspiration = () => {
               </ul>
             </div>
 
-            {/* 3. Resources Links */}
             <div className="flex-1 min-w-[140px] flex flex-col gap-3">
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#2C2822]">Resources</h3>
               <ul className="flex flex-col gap-2 text-xs text-[#7A705F]">
@@ -501,7 +759,6 @@ const CabInspiration = () => {
               </ul>
             </div>
 
-            {/* 4. Company Links */}
             <div className="flex-1 min-w-[140px] flex flex-col gap-3">
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#2C2822]">Company</h3>
               <ul className="flex flex-col gap-2 text-xs text-[#7A705F]">
@@ -512,7 +769,6 @@ const CabInspiration = () => {
               </ul>
             </div>
 
-            {/* 5. Newsletter Input */}
             <div className="flex-1 min-w-[240px] max-w-sm flex flex-col gap-3">
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#2C2822]">Newsletter</h3>
               <p className="text-xs text-[#7A705F] leading-relaxed">
@@ -537,7 +793,6 @@ const CabInspiration = () => {
             </div>
           </div>
 
-          {/* Bottom Bar / Copyright */}
           <div className="border-t border-[#E6E0D6] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#A89F91]">
             <p>© {new Date().getFullYear()} Project Elevator. All rights reserved.</p>
             <div className="flex items-center gap-5">
